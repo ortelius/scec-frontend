@@ -1,0 +1,32 @@
+Results of htmlhint linter (version 1.1.4)
+See documentation on https://megalinter.io/latest/descriptors/html_htmlhint/
+-----------------------------------------------
+
+❌ [ERROR] for workspace /tmp/lint
+Linter raw log:
+
+   Config loaded: /action/lib/.automation/.htmlhintrc
+
+   /tmp/lint/src/app.html
+[37m      L3 |[90m <head>[39m
+[37m          ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L4 |[90m  <meta charset="utf-8" />[39m
+[37m          ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L5 |[90m  <link rel="icon" href="%sveltekit.assets%/favicon.png" />[39m
+[37m          ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L6 |[90m  <meta name="viewport" content="width=device-width" />[39m
+[37m          ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L7 |[90m  %sveltekit.head%[39m
+[37m          ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L8 |[90m </head>[39m
+[37m          ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L8 |[90m </head>[39m
+[37m           ^ [31m<title> must be present in <head> tag. (title-require)[39m
+[37m      L9 |[90m <body data-sveltekit-preload-data="hover">[39m
+[37m          ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L10 |[90m  <div style="display: contents">%sveltekit.body%</div>[39m
+[37m           ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L11 |[90m </body>[39m
+[37m           ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+
+Scanned 1 files, found 10 errors in 1 files (94 ms)
