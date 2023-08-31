@@ -1,0 +1,18 @@
+Results of djlint linter (version 1.19.16)
+See documentation on https://megalinter.io/latest/descriptors/html_djlint/
+-----------------------------------------------
+
+❌ [ERROR] for workspace /tmp/lint
+Linter raw log:
+
+Linting 0/1 files ┈┈┈┈┈┈┈┈┈┈ 00:00    Linting 1/1 files ━━━━━━━━━━ 00:00                                          Linting 1/1 files ━━━━━━━━━━ 00:00    Linting 1/1 files ━━━━━━━━━━ 00:00
+
+
+src/app.html
+───────────────────────────────────────────────────────────────────────────────
+H016 2:0 Missing title tag in html. <html lang="en"> <h
+H030 2:0 Consider adding a meta description. <html lang="en"> <h
+H031 2:0 Consider adding meta keywords. <html lang="en"> <h
+H021 10:2 Inline styles should be avoided. <div style=
+
+Linted 1 file, found 4 errors.

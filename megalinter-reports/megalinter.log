@@ -1,0 +1,91 @@
+MARKDOWN_REMARK_LINT has been temporary disabled in MegaLinter, please use a previous MegaLinter version or wait for the next one !
+[31m❌ Linted [HTML] files with [djlint]: Found 4 error(s) - (2.21s)[0m
+--Error detail:
+
+Linting 0/1 files ┈┈┈┈┈┈┈┈┈┈ 00:00    Linting 1/1 files ━━━━━━━━━━ 00:00                                          Linting 1/1 files ━━━━━━━━━━ 00:00    Linting 1/1 files ━━━━━━━━━━ 00:00
+
+
+src/app.html
+───────────────────────────────────────────────────────────────────────────────
+H016 2:0 Missing title tag in html. <html lang="en"> <h
+H030 2:0 Consider adding a meta description. <html lang="en"> <h
+H031 2:0 Consider adding meta keywords. <html lang="en"> <h
+H021 10:2 Inline styles should be avoided. <div style=
+
+Linted 1 file, found 4 errors.
+
+
+[31m❌ Linted [TYPESCRIPT] files with [standard]: Found 1 error(s) - (13.87s)[0m
+--Error detail:
+standard: Use JavaScript Standard Style (https://standardjs.com)
+  /tmp/lint/src/app.d.ts:4:19: 'App' is defined but never used. (no-unused-vars)
+  /tmp/lint/src/app.d.ts:5:1: Unexpected tab character. (no-tabs)
+  /tmp/lint/src/app.d.ts:6:1: Unexpected tab character. (no-tabs)
+  /tmp/lint/src/app.d.ts:7:1: Unexpected tab character. (no-tabs)
+  /tmp/lint/src/app.d.ts:8:1: Unexpected tab character. (no-tabs)
+
+[31m❌ Linted [HTML] files with [htmlhint]: Found 10 error(s) - (1.15s)[0m
+--Error detail:
+
+   Config loaded: /action/lib/.automation/.htmlhintrc
+
+   /tmp/lint/src/app.html
+[37m      L3 |[90m <head>[39m
+[37m          ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L4 |[90m  <meta charset="utf-8" />[39m
+[37m          ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L5 |[90m  <link rel="icon" href="%sveltekit.assets%/favicon.png" />[39m
+[37m          ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L6 |[90m  <meta name="viewport" content="width=device-width" />[39m
+[37m          ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L7 |[90m  %sveltekit.head%[39m
+[37m          ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L8 |[90m </head>[39m
+[37m          ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L8 |[90m </head>[39m
+[37m           ^ [31m<title> must be present in <head> tag. (title-require)[39m
+[37m      L9 |[90m <body data-sveltekit-preload-data="hover">[39m
+[37m          ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L10 |[90m  <div style="display: contents">%sveltekit.body%</div>[39m
+[37m           ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+[37m      L11 |[90m </body>[39m
+[37m           ^ [31mPlease use space for indentation. (space-tab-mixed-disabled)[39m
+
+Scanned 1 files, found 10 errors in 1 files (94 ms)
+
+[31m❌ Linted [JSON] files with [jsonlint]: Found 1 error(s) - (0.5s)[0m
+--Error detail:
+File: /tmp/lint/tsconfig.json
+Parse error on line 13, column 3:
+...strict": true  }  // Path aliases are ...
+---------------------^
+Expected ',' or '}' after property value
+
+[31m❌ Linted [SPELL] files with [cspell]: Found 5 error(s) - (9.29s)[0m
+--Error detail:
+ 1/11 ./tmp/lint/.eslintignore 1544.90ms
+ 2/11 ./tmp/lint/.gitignore 92.14ms X
+/tmp/lint/.gitignore:9:1       - Unknown word (vite)       -- vite.config.js.timestamp
+	 Suggestions: [vita, vito, vitae, vibe, vice]
+/tmp/lint/.gitignore:10:1      - Unknown word (vite)       -- vite.config.ts.timestamp
+	 Suggestions: [vita, vito, vitae, vibe, vice]
+ 3/11 ./tmp/lint/.npmrc 13.69ms
+ 4/11 ./tmp/lint/bfcbf919-78a8-45c3-9d13-47f0e84da2d0-megalinter_file_names_cspell.txt 589.61ms X
+/tmp/lint/bfcbf919-78a8-45c3-9d13-47f0e84da2d0-megalinter_file_names_cspell.txt:3:11      - Unknown word (npmrc)      -- tmp lint npmrc
+	 Suggestions: [narc, parc, npr, nmr, nrc]
+/tmp/lint/bfcbf919-78a8-45c3-9d13-47f0e84da2d0-megalinter_file_names_cspell.txt:11:11     - Unknown word (vite)       -- tmp lint vite config
+	 Suggestions: [vita, vito, vitae, vibe, vice]
+ 5/11 ./tmp/lint/package.json 851.37ms X
+/tmp/lint/package.json:2:12      - Unknown word (scec)       -- "name": "scec-frontend",
+	 Suggestions: [scea, spec, SCEA, sec, Sec]
+ 6/11 ./tmp/lint/README.md 417.91ms
+ 7/11 ./tmp/lint/src/app.d.ts 74.93ms
+ 8/11 ./tmp/lint/src/app.html 114.07ms
+ 9/11 ./tmp/lint/svelte.config.js 98.86ms
+10/11 ./tmp/lint/tsconfig.json 84.18ms
+11/11 ./tmp/lint/vite.config.js 28.77ms
+CSpell: Files checked: 11, Issues found: 5 in 3 files
+
+[34mYou could have same capabilities but better runtime performances if you use a MegaLinter flavor:[0m
+- [javascript] oxsecurity/megalinter/flavors/javascript@ (57 linters) https://megalinter.io/latest/flavors/javascript/
+- [cupcake] oxsecurity/megalinter/flavors/cupcake@ (82 linters) https://megalinter.io/latest/flavors/cupcake/

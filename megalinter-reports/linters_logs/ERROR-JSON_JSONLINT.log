@@ -1,0 +1,11 @@
+Results of jsonlint linter (version 14.0.2)
+See documentation on https://megalinter.io/latest/descriptors/json_jsonlint/
+-----------------------------------------------
+
+❌ [ERROR] for workspace /tmp/lint
+Linter raw log:
+File: /tmp/lint/tsconfig.json
+Parse error on line 13, column 3:
+...strict": true  }  // Path aliases are ...
+---------------------^
+Expected ',' or '}' after property value
