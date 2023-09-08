@@ -1,54 +1,0 @@
-Results of cspell linter (version 6.31.1)
-See documentation on https://megalinter.io/latest/descriptors/spell_cspell/
------------------------------------------------
-
-❌ [ERROR] for workspace /tmp/lint
-Linter raw log:
- 1/11 ./tmp/lint/.eslintignore 1544.90ms
- 2/11 ./tmp/lint/.gitignore 92.14ms X
-/tmp/lint/.gitignore:9:1       - Unknown word (vite)       -- vite.config.js.timestamp
-	 Suggestions: [vita, vito, vitae, vibe, vice]
-/tmp/lint/.gitignore:10:1      - Unknown word (vite)       -- vite.config.ts.timestamp
-	 Suggestions: [vita, vito, vitae, vibe, vice]
- 3/11 ./tmp/lint/.npmrc 13.69ms
- 4/11 ./tmp/lint/bfcbf919-78a8-45c3-9d13-47f0e84da2d0-megalinter_file_names_cspell.txt 589.61ms X
-/tmp/lint/bfcbf919-78a8-45c3-9d13-47f0e84da2d0-megalinter_file_names_cspell.txt:3:11      - Unknown word (npmrc)      -- tmp lint npmrc
-	 Suggestions: [narc, parc, npr, nmr, nrc]
-/tmp/lint/bfcbf919-78a8-45c3-9d13-47f0e84da2d0-megalinter_file_names_cspell.txt:11:11     - Unknown word (vite)       -- tmp lint vite config
-	 Suggestions: [vita, vito, vitae, vibe, vice]
- 5/11 ./tmp/lint/package.json 851.37ms X
-/tmp/lint/package.json:2:12      - Unknown word (scec)       -- "name": "scec-frontend",
-	 Suggestions: [scea, spec, SCEA, sec, Sec]
- 6/11 ./tmp/lint/README.md 417.91ms
- 7/11 ./tmp/lint/src/app.d.ts 74.93ms
- 8/11 ./tmp/lint/src/app.html 114.07ms
- 9/11 ./tmp/lint/svelte.config.js 98.86ms
-10/11 ./tmp/lint/tsconfig.json 84.18ms
-11/11 ./tmp/lint/vite.config.js 28.77ms
-CSpell: Files checked: 11, Issues found: 5 in 3 files
-
-
-You can skip this misspellings by defining the following .cspell.json file at the root of your repository
-Of course, please correct real typos before :)
-
-{
-    "version": "0.2",
-    "language": "en",
-    "ignorePaths": [
-        "**/node_modules/**",
-        "**/vscode-extension/**",
-        "**/.git/**",
-        "**/.pnpm-lock.json",
-        ".vscode",
-        "package-lock.json",
-        "megalinter-reports"
-    ],
-    "words": [
-        "npmrc",
-        "scec",
-        "vite"
-    ]
-}
-
-
-You can also copy-paste megalinter-reports/.cspell.json at the root of your repository
