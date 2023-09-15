@@ -16,8 +16,11 @@
   "devDependencies": {
     "@mdi/js": "^7.2.96",
     "@smui/button": "^7.0.0-beta.15",
+    "@smui/card": "^7.0.0-beta.15",
     "@smui/common": "^7.0.0-beta.15",
     "@smui/icon-button": "^7.0.0-beta.15",
+    "@smui/layout-grid": "^7.0.0-beta.15",
+    "@smui/textfield": "^7.0.0-beta.15",
     "@smui/top-app-bar": "^7.0.0-beta.15",
     "@sveltejs/adapter-auto": "^2.1.0",
     "@sveltejs/kit": "^1.24.1",

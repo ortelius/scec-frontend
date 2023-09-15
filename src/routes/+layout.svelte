@@ -23,6 +23,7 @@
   {:else}
   <link rel="stylesheet" href="/smui.css"/>
   {/if}
+  <link rel="stylesheet" href="/ortelius.css"/>
 </svelte:head>
 
 <TopAppBar bind:this={topAppBar} variant="standard">

@@ -1,0 +1,17 @@
+article {
+    margin: 0 0 1em 0;
+}
+
+h1 {
+    font-size: 1.4em;
+    margin: 0;
+    display: block;
+}
+
+.cell_title {
+    font-family: 'Roboto';
+    font-weight: 400;
+    font-size: 1.25em;
+    font-variant-caps: all-small-caps;
+    padding-bottom: 10px;
+}
