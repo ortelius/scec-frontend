@@ -13,13 +13,18 @@
 
 html,
 body {
-  background-color: #000;
+  background-color: theme.$background;
   color: theme.$on-surface;
 }
 
-a {
-  color: #40b3ff;
+.swagger-ui * {
+  color: white !important;
 }
-a:visited {
-  color: color.scale(#40b3ff, $lightness: -35%);
+
+.weather-night {
+  display: inline-block !important;
+}
+
+.weather-sunny {
+  display: none !important;
 }
