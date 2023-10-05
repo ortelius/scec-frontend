@@ -8,7 +8,7 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "prepare": "npm run smui-theme-light && npm run smui-theme-dark && src/theme/create-dark-css.sh && npm run smui-theme",
+    "prepare": "npm run smui-theme-light && npm run smui-theme-dark && src/theme/create-dark-css.sh && npm run smui-theme && echo >> static/smui-light.css && echo >> static/smui-dark.css",
     "smui-theme-light": "smui-theme compile static/smui-light.css -i src/theme/light -s expanded",
     "smui-theme-dark": "smui-theme compile src/theme/work/smui-dark.css -i src/theme/dark -s expanded",
     "smui-theme": "smui-theme compile static/smui-dark.css -i src/theme/work -s expanded",
