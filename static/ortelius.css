@@ -3,15 +3,44 @@ article {
 }
 
 h1 {
-    font-size: 1.4em;
+    font-size: 1.5em;
     margin: 0;
     display: block;
 }
 
 .cell_title {
     font-family: 'Roboto';
-    font-weight: 400;
-    font-size: 1.25em;
+    font-weight: 600;
+    font-size: 1.5em;
     font-variant-caps: all-small-caps;
     padding-bottom: 10px;
+}
+
+.markdown > p {
+    font-weight: var(--mdc-typography-subtitle1-font-weight, 200);
+    font-size: var(--mdc-typography-subtitle1-font-size, 1rem);
+}
+
+.markdown > h1 {
+    font-weight: var(--mdc-typography-subtitle1-font-weight, 400);
+    font-size: var(--mdc-typography-subtitle1-font-size, 1.3rem);
+}
+
+.markdown > h2 {
+    font-weight: var(--mdc-typography-subtitle1-font-weight, 300);
+    font-size: var(--mdc-typography-subtitle1-font-size, 1.2rem);
+}
+
+.markdown > h3, h4, h5, th, td {
+    font-size: var(--mdc-typography-subtitle1-font-size, 1.1rem);
+}
+
+html {
+    font-family: 'Roboto';
+    background-color: green !important;
+}
+
+html.dark {
+        font-family: 'Roboto';
+        background-color: red !important;
 }

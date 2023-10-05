@@ -8,9 +8,10 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "prepare": "npm run smui-theme-light && npm run smui-theme-dark",
-    "smui-theme-light": "smui-theme compile static/smui.css -i src/theme",
-    "smui-theme-dark": "smui-theme compile static/smui-dark.css -i src/theme/dark",
+    "prepare": "npm run smui-theme-light && npm run smui-theme-dark && src/theme/create-dark-css.sh && npm run smui-theme",
+    "smui-theme-light": "smui-theme compile static/smui-light.css -i src/theme/light -s expanded",
+    "smui-theme-dark": "smui-theme compile src/theme/work/smui-dark.css -i src/theme/dark -s expanded",
+    "smui-theme": "smui-theme compile static/smui-dark.css -i src/theme/work -s expanded",
     "lint": "eslint ."
   },
   "devDependencies": {
@@ -37,6 +38,12 @@
   },
   "type": "module",
   "dependencies": {
+    "@smui/data-table": "^7.0.0-beta.15",
+    "marked": "^9.0.3",
+    "svrollbar": "^0.12.0",
+    "swagger-ui": "^5.9.0",
+    "swagger-ui-dist": "^5.9.0",
+    "swagger-ui-react": "^5.9.0",
     "vite-plugin-ssr": "^0.4.140"
   }
 }
