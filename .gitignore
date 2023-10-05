@@ -170,3 +170,5 @@ debug/
 
 # direnv files
 .envrc
+
+!src/lib

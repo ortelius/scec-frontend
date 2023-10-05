@@ -2,28 +2,38 @@
   import TopAppBar, { Row, Section, Title, AutoAdjust } from '@smui/top-app-bar';
   import { mdiMenu, mdiWeatherSunny, mdiWeatherNight } from '@mdi/js';
   import IconButton, { Icon } from '@smui/icon-button';
-  import {onMount} from 'svelte';
+  import { browser } from '$app/environment';
+  import { writable } from 'svelte/store'
+  const theme = writable("light");
 
   let topAppBar: TopAppBar;
-  let darkMode: boolean | undefined = undefined;
 
-  onMount(() => {
-    darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
+  function isDarkMode() {
+    return (browser && document.documentElement.classList.contains("dark")) ? true : false;
+  }
+
+  // Toggles the "dark" class
+  function toggleDarkMode() {
+    let newstate = "dark";
+
+    if (isDarkMode())
+     newstate = "light";
+
+    theme.set(newstate);
+
+    if (browser)
+    {
+      localStorage.setItem("theme",newstate);
+      (newstate == "dark") ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark');
+    }
+  }
 </script>
 
 <svelte:head>
-	<!-- SMUI Styles -->
-  {#if darkMode === undefined }
-	<link rel="stylesheet" href="/smui.css" media="(prefers-color-scheme: light)" />
-  <link rel="stylesheet" href="/smui-dark.css" media="screen and (prefers-color-scheme: dark)" />
-  {:else if darkMode}
-	<link rel="stylesheet" href="/smui.css"/>
-  <link rel="stylesheet" href="/smui-dark.css" media="screen" />
-  {:else}
-  <link rel="stylesheet" href="/smui.css"/>
-  {/if}
-  <link rel="stylesheet" href="/ortelius.css"/>
+  <meta name="color-scheme" content="light dark" />
+  <link rel="stylesheet" type="text/css" href="node_modules/swagger-ui-dist/swagger-ui.css">
+  <link rel="stylesheet" type="text/css" href="/smui-light.css" />
+  <link rel="stylesheet" type="text/css" href="/smui-dark.css" />
 </svelte:head>
 
 <TopAppBar bind:this={topAppBar} variant="standard">
@@ -37,9 +47,12 @@
       <Title>Standard</Title>
     </Section>
     <Section align="end" toolbar>
-      <IconButton on:click={() => (darkMode = !darkMode)}>
-        <Icon tag="svg" viewBox="0 0 24 24">
-          <path fill="currentColor" d={ (darkMode === undefined || darkMode) ? mdiWeatherNight : mdiWeatherSunny } />
+      <IconButton on:click={() => { toggleDarkMode() }} >
+        <Icon tag="svg" viewBox="0 0 24 24" class="weather-night">
+          <path fill="currentColor" d={mdiWeatherNight} />
+        </Icon>
+        <Icon tag="svg" viewBox="0 0 24 24" class="weather-sunny">
+          <path fill="currentColor" d={mdiWeatherSunny} />
         </Icon>
       </IconButton>
     </Section>
