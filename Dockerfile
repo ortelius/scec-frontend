@@ -7,7 +7,7 @@ RUN npm install --ignore-scripts
 
 COPY . .
 
-RUN npm run prepare
-RUN npm run build
+RUN npm run prepare &&\
+  npm run build
 
 CMD ["npm", "run", "preview"]
