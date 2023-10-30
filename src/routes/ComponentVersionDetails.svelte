@@ -2,7 +2,8 @@
 <script>
 	import {onMount} from 'svelte';
 
-	const apiURL = "http://localhost:8080/msapi/compver/bafkreifw6fbrhbmcscd2bw2bz2gcmb4ge5fjh7rsvf3slygd3fugfym67y";
+	// const apiURL = "http://localhost:8080/msapi/compver/bafkreifw6fbrhbmcscd2bw2bz2gcmb4ge5fjh7rsvf3slygd3fugfym67y";
+	const apiURL = "http://localhost:8080/msapi/compver/bafkreie2tvmlendutm5gss7vrgr7jrd65mkuiqtfnugrdeujszuyaerrha";
 	let compname = "";
 
  	onMount(async ()  => {

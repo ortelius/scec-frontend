@@ -6,8 +6,8 @@
   import Textfield from "@smui/textfield";
   import { mdiOpenInNew } from "@mdi/js";
   import IconButton, { Icon } from "@smui/icon-button";
-  import Select, { Option } from '@smui/select';
-  import { Label } from '@smui/common';
+  import Select, { Option } from "@smui/select";
+  import { Label } from "@smui/common";
   import { marked } from "marked";
   import { Svroller } from "svrollbar";
   import DataTable, { Head, Body, Row, Cell, Pagination } from "@smui/data-table";
@@ -90,7 +90,8 @@
   cells = cells.slice(1);
   let swaggerUI;
 
-  const apiURL = "http://localhost:8080/msapi/compver/bafkreif4ejff67pjs47qgvrnffymj24g7gkcb2hqf6geevttygqqpicbdu";
+  //  const apiURL = "http://localhost:8080/msapi/compver/bafkreif4ejff67pjs47qgvrnffymj24g7gkcb2hqf6geevttygqqpicbdu";
+  const apiURL = "http://localhost:8080/msapi/compver/bafkreie2tvmlendutm5gss7vrgr7jrd65mkuiqtfnugrdeujszuyaerrha";
 
   onMount(async () => {
     await fetch(apiURL)
@@ -157,6 +158,7 @@
       <DataTable style="width: 100%;height: 28em">
         <Head>
           <Row>
+            <Cell>Score</Cell>
             <Cell>Package</Cell>
             <Cell>Version</Cell>
             <Cell>Language</Cell>
@@ -168,11 +170,20 @@
         <Body>
           {#each pkgs.slice(start, end) as fld}
             <Row>
+              <Cell class="severity-{fld.severity.toLowerCase()}">{fld.score}</Cell>
               <Cell>{fld.name}</Cell>
               <Cell>{fld.version}</Cell>
               <Cell>{fld.license}</Cell>
               <Cell>{fld.language}</Cell>
-              <Cell>{fld.cve}</Cell>
+              <Cell>
+                {#if fld.cve.includes(",")}
+                  {#each fld.cve.split(",") as cve}
+                    <a href="https://osv.dev/vulnerability/{cve}" target="_blank">{cve}</a><br />
+                  {/each}
+                {:else}
+                  <a href="https://osv.dev/vulnerability/{fld.cve}" target="_blank">{fld.cve}</a>
+                {/if}
+              </Cell>
               <Cell>{fld.summary}</Cell>
             </Row>
           {/each}
