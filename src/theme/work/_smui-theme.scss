@@ -17,6 +17,22 @@ body {
   display: none !important;
 }
 
+.severity-critical {
+  background-color: #b71c1c !important;
+}
+
+.severity-high {
+  background-color: #ef6c00 !important;
+}
+
+.severity-medium {
+  background-color: #fbc02d !important;
+}
+
+.severity-low {
+  background-color: #4caf50 !important;
+}
+
 .mdc-touch-target-wrapper {
   display: inline;
 }
