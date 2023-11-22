@@ -25,6 +25,7 @@
     "@smui/top-app-bar": "^7.0.0-beta.15",
     "@sveltejs/adapter-auto": "^2.1.0",
     "@sveltejs/kit": "^1.25.1",
+    "@types/lodash": "^4.14.200",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
     "eslint": "^8.50.0",

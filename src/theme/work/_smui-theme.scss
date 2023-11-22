@@ -33,6 +33,18 @@ body {
   background-color: #4caf50 !important;
 }
 
+.open-small {
+  top: 6px !important;
+  height: 18px !important;
+  width: 18px !important;
+  padding: 2px !important;
+}
+
+.cell-text-top {
+  vertical-align: top !important;
+  padding-top: 6px !important;
+}
+
 .mdc-touch-target-wrapper {
   display: inline;
 }

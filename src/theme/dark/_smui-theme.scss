@@ -44,3 +44,15 @@ body {
 .severity-low {
   background-color: color-palette.$green-500 !important;
 }
+
+.open-small {
+  top: 6px !important;
+  height:18px !important;
+  width:18px !important;
+  padding: 2px !important;
+}
+
+.cell-text-top {
+  vertical-align: top !important;
+  padding-top: 6px !important;
+}
