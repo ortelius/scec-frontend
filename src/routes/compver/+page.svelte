@@ -91,7 +91,8 @@
   let swaggerUI;
 
   //  const apiURL = "http://localhost:8080/msapi/compver/bafkreif4ejff67pjs47qgvrnffymj24g7gkcb2hqf6geevttygqqpicbdu";
-  const apiURL = "http://localhost:8080/msapi/compver/bafkreie2tvmlendutm5gss7vrgr7jrd65mkuiqtfnugrdeujszuyaerrha";
+  // const apiURL = "http://localhost:8080/msapi/compver/bafkreie2tvmlendutm5gss7vrgr7jrd65mkuiqtfnugrdeujszuyaerrha";
+	const apiURL = "http://localhost:8080/msapi/compver/bafkreihgh5zqsptqaaxarpx7j6ucsktxr7337hffin76r5basyzrzk3ydm";
 
   onMount(async () => {
     await fetch(apiURL)
@@ -140,7 +141,7 @@
       {#each compinfo.fields as fld}
         {#if isLink(fld.value)}
           <Textfield bind:value={fld.value} label={fld.label}>
-            <IconButton slot="trailingIcon" on:click={() => window.open(getLink(fld.value), "_blank")}>
+            <IconButton role="button" slot="trailingIcon" action="open-link" on:click={() => window.open(getLink(fld.value), "_blank")}>
               <Icon tag="svg" viewBox="0 0 24 24">
                 <path fill="currentColor" d={mdiOpenInNew} />
               </Icon>
@@ -158,7 +159,7 @@
       <DataTable style="width: 100%;height: 28em">
         <Head>
           <Row>
-            <Cell>Score</Cell>
+            <Cell />
             <Cell>Package</Cell>
             <Cell>Version</Cell>
             <Cell>Language</Cell>
@@ -170,21 +171,43 @@
         <Body>
           {#each pkgs.slice(start, end) as fld}
             <Row>
-              <Cell class="severity-{fld.severity.toLowerCase()}">{fld.score}</Cell>
-              <Cell>{fld.name}</Cell>
-              <Cell>{fld.version}</Cell>
-              <Cell>{fld.license}</Cell>
-              <Cell>{fld.language}</Cell>
+              <Cell class="severity-{fld.severity.toLowerCase()}" />
+              <Cell class="cell-text-top">{fld.name}</Cell>
+              <Cell class="cell-text-top">{fld.version}</Cell>
+              <Cell class="cell-text-top">{fld.license}</Cell>
+              <Cell class="cell-text-top">{fld.language}</Cell>
               <Cell>
                 {#if fld.cve.includes(",")}
                   {#each fld.cve.split(",") as cve}
-                    <a href="https://osv.dev/vulnerability/{cve}" target="_blank">{cve}</a><br />
+                    {cve}
+                    <IconButton role="button" class="open-small" action="open-link" on:click={() => window.open(getLink(`https://osv.dev/vulnerability/${cve}`), "_blank")}>
+                      <Icon tag="svg" viewBox="0 0 24 24">
+                        <path fill="currentColor" d={mdiOpenInNew} />
+                      </Icon>
+                    </IconButton>
+                    <br />
                   {/each}
                 {:else}
-                  <a href="https://osv.dev/vulnerability/{fld.cve}" target="_blank">{fld.cve}</a>
+                  {fld.cve}
+                  {#if fld.cve.length > 0}
+                    <IconButton role="button" class="open-small" action="open-link" on:click={() => window.open(getLink(`https://osv.dev/vulnerability/${fld.cve}`), "_blank")}>
+                      <Icon tag="svg" viewBox="0 0 24 24">
+                        <path fill="currentColor" d={mdiOpenInNew} />
+                      </Icon>
+                    </IconButton>
+                  {/if}
                 {/if}
               </Cell>
-              <Cell>{fld.summary}</Cell>
+              <Cell class="cell-text-top">
+                {#if fld.summary.includes("|")}
+                  {#each fld.summary.split("|") as summary}
+                    {summary}
+                    <br />
+                  {/each}
+                {:else}
+                  {fld.summary}
+                {/if}
+              </Cell>
             </Row>
           {/each}
         </Body>
@@ -201,10 +224,10 @@
             {start + 1}-{end} of {pkgs.length}
           </svelte:fragment>
 
-          <IconButton class="material-icons" action="first-page" title="First page" on:click={() => (currentPage = 0)} disabled={currentPage === 0}>first_page</IconButton>
-          <IconButton class="material-icons" action="prev-page" title="Prev page" on:click={() => currentPage--} disabled={currentPage === 0}>chevron_left</IconButton>
-          <IconButton class="material-icons" action="next-page" title="Next page" on:click={() => currentPage++} disabled={currentPage === lastPage}>chevron_right</IconButton>
-          <IconButton class="material-icons" action="last-page" title="Last page" on:click={() => (currentPage = lastPage)} disabled={currentPage === lastPage}>last_page</IconButton>
+          <IconButton role="button" class="material-icons" action="first-page" title="First page" on:click={() => (currentPage = 0)} disabled={currentPage === 0}>first_page</IconButton>
+          <IconButton role="button" class="material-icons" action="prev-page" title="Prev page" on:click={() => currentPage--} disabled={currentPage === 0}>chevron_left</IconButton>
+          <IconButton role="button" class="material-icons" action="next-page" title="Next page" on:click={() => currentPage++} disabled={currentPage === lastPage}>chevron_right</IconButton>
+          <IconButton role="button" class="material-icons" action="last-page" title="Last page" on:click={() => (currentPage = lastPage)} disabled={currentPage === lastPage}>last_page</IconButton>
         </Pagination>
       </DataTable>
     </Card>
@@ -218,7 +241,7 @@
         {#each cell_detail.fields as fld}
           {#if isLink(fld.value)}
             <Textfield bind:value={fld.value} label={fld.label}>
-              <IconButton slot="trailingIcon" on:click={() => window.open(getLink(fld.value), "_blank")}>
+              <IconButton role="button" slot="trailingIcon" action="open-link" on:click={() => window.open(getLink(fld.value), "_blank")}>
                 <Icon tag="svg" viewBox="0 0 24 24">
                   <path fill="currentColor" d={mdiOpenInNew} />
                 </Icon>

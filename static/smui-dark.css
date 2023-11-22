@@ -31,6 +31,16 @@
 .dark .severity-low {
   background-color: #4caf50 !important;
 }
+.dark .open-small {
+  top: 6px !important;
+  height: 18px !important;
+  width: 18px !important;
+  padding: 2px !important;
+}
+.dark .cell-text-top {
+  vertical-align: top !important;
+  padding-top: 6px !important;
+}
 .dark .mdc-touch-target-wrapper {
   display: inline;
 }
