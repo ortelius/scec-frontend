@@ -1,6 +1,6 @@
 ---
 apiVersion: v2
-description: Domain microservice
+description: Frontend microservice
 icon: https://ortelius.github.io/ortelius-charts/logo.png
 name: scec-frontend
 type: application
