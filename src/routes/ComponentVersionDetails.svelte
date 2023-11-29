@@ -2,8 +2,10 @@
 <script>
 	import {onMount} from 'svelte';
 
+	let restapiURL = (process.env.RESTAPI_URL) ? process.env.RESTAPI_URL : "http://localhost:8080";
+
 	//const apiURL = "http://localhost:8080/msapi/compver/bafkreifw6fbrhbmcscd2bw2bz2gcmb4ge5fjh7rsvf3slygd3fugfym67y";
-	const apiURL = "http://localhost:8080/msapi/compver/bafkreie2tvmlendutm5gss7vrgr7jrd65mkuiqtfnugrdeujszuyaerrha";
+	let apiURL = restapiURL + "/msapi/compver/bafkreie2tvmlendutm5gss7vrgr7jrd65mkuiqtfnugrdeujszuyaerrha";
 	let compname = "";
 
  	onMount(async ()  => {
