@@ -1,5 +1,4 @@
 FROM node:21-alpine@sha256:f07e0cefd7566fc0b5f652625b809290b3095a7cede9c63681a6883729e31e3d
-
 EXPOSE 8080
 
 WORKDIR /usr/src/app
