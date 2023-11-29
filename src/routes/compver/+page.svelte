@@ -90,9 +90,11 @@
   cells = cells.slice(1);
   let swaggerUI;
 
+  let restapiURL = (process.env.RESTAPI_URL) ? process.env.RESTAPI_URL : "http://localhost:8080";
+
   //  const apiURL = "http://localhost:8080/msapi/compver/bafkreif4ejff67pjs47qgvrnffymj24g7gkcb2hqf6geevttygqqpicbdu";
   // const apiURL = "http://localhost:8080/msapi/compver/bafkreie2tvmlendutm5gss7vrgr7jrd65mkuiqtfnugrdeujszuyaerrha";
-	const apiURL = "http://localhost:8080/msapi/compver/bafkreihgh5zqsptqaaxarpx7j6ucsktxr7337hffin76r5basyzrzk3ydm";
+	let apiURL = restapiURL + "/msapi/compver/bafkreihgh5zqsptqaaxarpx7j6ucsktxr7337hffin76r5basyzrzk3ydm";
 
   onMount(async () => {
     await fetch(apiURL)
