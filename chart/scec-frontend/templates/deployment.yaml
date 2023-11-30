@@ -39,7 +39,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: RESTAPI_URL
-              value: {{ ((.Values.restapi).url) | default "http://localhost:8080" }}
+              value: {{ ((.Values.restapi).url) | default {{ printf "http://scec-nginx.%s.svc.cluster.local" .Release.Namespace }} }}
           ports:
             - name: http
               containerPort: 8080
