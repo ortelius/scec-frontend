@@ -8,7 +8,7 @@
     "preview": "vite preview --host 0.0.0.0 --port 8080",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "prepare": "npm run smui-theme-light && npm run smui-theme-dark && src/theme/create-dark-css.sh && npm run smui-theme && echo >> static/smui-light.css && echo >> static/smui-dark.css",
+    "prepare": "cp node_modules/swagger-ui-dist/swagger-ui.css* static/swagger-ui-dist && npm run smui-theme-light && npm run smui-theme-dark && src/theme/create-dark-css.sh && npm run smui-theme && echo >> static/smui-light.css && echo >> static/smui-dark.css",
     "smui-theme-light": "smui-theme compile static/smui-light.css -i src/theme/light -s expanded",
     "smui-theme-dark": "smui-theme compile src/theme/work/smui-dark.css -i src/theme/dark -s expanded",
     "smui-theme": "smui-theme compile static/smui-dark.css -i src/theme/work -s expanded",
@@ -23,7 +23,7 @@
     "@smui/layout-grid": "^7.0.0-beta.15",
     "@smui/textfield": "^7.0.0-beta.15",
     "@smui/top-app-bar": "^7.0.0-beta.15",
-    "@sveltejs/adapter-auto": "^2.1.1",
+    "@sveltejs/adapter-node": "^1.3.1",
     "@sveltejs/kit": "^1.27.6",
     "@types/lodash": "^4.14.200",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
@@ -35,7 +35,7 @@
     "svelte-check": "^3.5.2",
     "tslib": "^2.6.2",
     "typescript": "^5.2.2",
-    "vite": "^4.0.0"
+    "vite": "~4.5.1"
   },
   "type": "module",
   "dependencies": {

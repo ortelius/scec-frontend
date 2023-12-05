@@ -31,7 +31,7 @@
 
 <svelte:head>
   <meta name="color-scheme" content="light dark" />
-  <link rel="stylesheet" type="text/css" href="node_modules/swagger-ui-dist/swagger-ui.css">
+  <link rel="stylesheet" type="text/css" href="/swagger-ui-dist/swagger-ui.css">
   <link rel="stylesheet" type="text/css" href="/smui-light.css" />
   <link rel="stylesheet" type="text/css" href="/smui-dark.css" />
 </svelte:head>
