@@ -47,7 +47,7 @@
       <Title>Standard</Title>
     </Section>
     <Section align="end" toolbar>
-      <IconButton on:click={() => { toggleDarkMode() }} >
+      <IconButton role="button" on:click={() => { toggleDarkMode() }} >
         <Icon tag="svg" viewBox="0 0 24 24" class="weather-night">
           <path fill="currentColor" d={mdiWeatherNight} />
         </Icon>
