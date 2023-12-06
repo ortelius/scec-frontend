@@ -90,7 +90,11 @@
   cells = cells.slice(1);
   let swaggerUI;
 
-  let restapiURL = (process.env.RESTAPI_URL) ? process.env.RESTAPI_URL : "http://localhost:8080";
+  let restapiURL = "http://localhost:8080";
+
+  if (!window.location.origin) {
+    restapiURL = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+  }
 
   //  const apiURL = "http://localhost:8080/msapi/compver/bafkreif4ejff67pjs47qgvrnffymj24g7gkcb2hqf6geevttygqqpicbdu";
   // const apiURL = "http://localhost:8080/msapi/compver/bafkreie2tvmlendutm5gss7vrgr7jrd65mkuiqtfnugrdeujszuyaerrha";
