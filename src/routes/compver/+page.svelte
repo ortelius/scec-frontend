@@ -90,17 +90,13 @@
   cells = cells.slice(1);
   let swaggerUI;
 
-  let restapiURL = "http://localhost:8080";
 
-  if (!window.location.origin) {
-    restapiURL = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
-  }
-
-  //  const apiURL = "http://localhost:8080/msapi/compver/bafkreif4ejff67pjs47qgvrnffymj24g7gkcb2hqf6geevttygqqpicbdu";
+  // const apiURL = "http://localhost:8080/msapi/compver/bafkreif4ejff67pjs47qgvrnffymj24g7gkcb2hqf6geevttygqqpicbdu";
   // const apiURL = "http://localhost:8080/msapi/compver/bafkreie2tvmlendutm5gss7vrgr7jrd65mkuiqtfnugrdeujszuyaerrha";
-	let apiURL = restapiURL + "/msapi/compver/bafkreihgh5zqsptqaaxarpx7j6ucsktxr7337hffin76r5basyzrzk3ydm";
 
   onMount(async () => {
+		let apiURL = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '') + "/msapi/compver/bafkreie2tvmlendutm5gss7vrgr7jrd65mkuiqtfnugrdeujszuyaerrha";
+
     await fetch(apiURL)
       .then((r) => r.json())
       .then((data) => {
