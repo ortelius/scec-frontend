@@ -1,11 +1,18 @@
-FROM node:21-alpine@sha256:db8772d9f5796ac4e8c47508038c413ea1478da010568a2e48672f19a8b80cd2
-EXPOSE 8080
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023.4.20240513.0@sha256:f4c096ddea744b7e453acab52e4c54028b7f1563aac6f14870fbb27325617d9c
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+EXPOSE 8080
 
 WORKDIR /usr/src/app
 
 COPY package*.json .
-RUN npm install --ignore-scripts
+
+# hadolint ignore=DL3041
+RUN curl -fsSL https://rpm.nodesource.com/setup_21.x | bash -; \
+    dnf install nodejs -y; \
+    npm install --ignore-scripts; \
+    dnf upgrade -y; \
+    dnf clean all
 
 COPY . .
 
