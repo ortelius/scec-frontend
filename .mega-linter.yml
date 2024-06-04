@@ -11,10 +11,25 @@ DISABLE_LINTERS:
   - REPOSITORY_DEVSKIM
   - REPOSITORY_CHECKOV
   - REPOSITORY_KICS
-  - REPOSITORY_KICS
-  - CSS_STYLELINT
-  - CSS_SCSS_LINT
   - MARKDOWN_MARKDOWN_LINK_CHECK
 DISABLE:
   - COPYPASTE
   - SPELL
+
+GO_GOLANGCI_LINT_ARGUMENTS:
+  - "run"
+  - "./..."
+  - "--timeout"
+  - "10m"
+  - "--fix"
+  - "--show-stats"
+
+GO_GOLANGCI_LINT_COMMAND_REMOVE_ARGUMENTS:
+  - "run"
+  - "--fix"
+
+PRE_COMMANDS:
+  - command: wget https://go.dev/dl/go1.22.2.linux-amd64.tar.gz
+  - command: rm -rf /usr/lib/go
+  - command: tar -xf go1.22.2.linux-amd64.tar.gz -C /usr/lib
+  - command: go version
