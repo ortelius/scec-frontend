@@ -1,5 +1,5 @@
 article {
-    margin: 0 0 1em 0;
+    margin: 0 0 1em;
 }
 
 h1 {
@@ -9,7 +9,7 @@ h1 {
 }
 
 .cell_title {
-    font-family: 'Roboto';
+    font-family: Roboto;
     font-weight: 600;
     font-size: 1.5em;
     font-variant-caps: all-small-caps;
@@ -36,11 +36,11 @@ h1 {
 }
 
 html {
-    font-family: 'Roboto';
+    font-family: Roboto;
     background-color: green !important;
 }
 
 html.dark {
-        font-family: 'Roboto';
+        font-family: Roboto;
         background-color: red !important;
 }
