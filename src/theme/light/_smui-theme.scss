@@ -1,5 +1,4 @@
 @use 'sass:color';
-
 @use '@material/theme/color-palette';
 
 // Svelte Colors!
@@ -15,7 +14,7 @@ html,
 body {
   background-color: theme.$background;
   color: theme.$on-surface;
-  font-family: "Roboto";
+  font-family: Roboto;
 }
 
 body {
@@ -25,6 +24,7 @@ body {
 a {
   color: #40b3ff;
 }
+
 a:visited {
   color: color.scale(#40b3ff, $lightness: -35%);
 }
@@ -96,6 +96,7 @@ h1 {
   width:18px !important;
   padding: 2px !important;
 }
+
 .cell-text-top {
   vertical-align: top !important;
   padding-top: 6px !important;
