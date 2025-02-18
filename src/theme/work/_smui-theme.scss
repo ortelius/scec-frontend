@@ -934,9 +934,9 @@ svg.mdc-button__icon {
   --mdc-ripple-fg-opacity: var(--mdc-ripple-press-opacity, 0.12);
 }
 .smui-ripple-surface--secondary::before, .smui-ripple-surface--secondary::after {
-  background-color: rgb(92.7, 92.7, 120);
+  background-color: rgb(118.2, 118.2, 133.5);
   /* @alternate */
-  background-color: var(--mdc-ripple-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
+  background-color: var(--mdc-ripple-color, var(--mdc-theme-secondary, rgb(118.2, 118.2, 133.5)));
 }
 .smui-ripple-surface--secondary:hover::before, .smui-ripple-surface--secondary.mdc-ripple-surface--hover::before {
   opacity: 0.04;
@@ -963,13 +963,13 @@ svg.mdc-button__icon {
 }
 
 .smui-button--color-secondary:not(:disabled) {
-  color: rgb(92.7, 92.7, 120);
+  color: rgb(118.2, 118.2, 133.5);
 }
 .smui-button--color-secondary:not(:disabled) .mdc-button__icon {
-  color: rgb(92.7, 92.7, 120);
+  color: rgb(118.2, 118.2, 133.5);
 }
 .smui-button--color-secondary.mdc-button--raised:not(:disabled), .smui-button--color-secondary.mdc-button--unelevated:not(:disabled) {
-  background-color: rgb(92.7, 92.7, 120);
+  background-color: rgb(118.2, 118.2, 133.5);
 }
 .smui-button--color-secondary.mdc-button--raised:not(:disabled), .smui-button--color-secondary.mdc-button--unelevated:not(:disabled) {
   color: white;
@@ -1011,12 +1011,12 @@ svg.mdc-button__icon {
   color: #fff;
 }
 .smui-button--color-secondary.mdc-button--outlined:not(:disabled) {
-  border-color: rgb(92.7, 92.7, 120);
+  border-color: rgb(118.2, 118.2, 133.5);
 }
 .smui-button--color-secondary .mdc-button__ripple::before, .smui-button--color-secondary .mdc-button__ripple::after {
-  background-color: rgb(92.7, 92.7, 120);
+  background-color: rgb(118.2, 118.2, 133.5);
   /* @alternate */
-  background-color: var(--mdc-ripple-color, rgb(92.7, 92.7, 120));
+  background-color: var(--mdc-ripple-color, rgb(118.2, 118.2, 133.5));
 }
 .smui-button--color-secondary:hover .mdc-button__ripple::before, .smui-button--color-secondary.mdc-ripple-surface--hover .mdc-button__ripple::before {
   opacity: 0.04;
@@ -1096,9 +1096,9 @@ svg.mdc-button__icon {
   border-radius: 4px;
   /* @alternate */
   border-radius: var(--mdc-shape-medium, 4px);
-  background-color: #212125;
+  background-color: #212104;
   /* @alternate */
-  background-color: var(--mdc-theme-surface, #212125);
+  background-color: var(--mdc-theme-surface, #212104);
   /* @alternate */
   position: relative;
   /* @alternate */
@@ -1141,7 +1141,7 @@ svg.mdc-button__icon {
   box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0.2), 0px 0px 0px 0px rgba(0, 0, 0, 0.14), 0px 0px 0px 0px rgba(0, 0, 0, 0.12);
   border-width: 1px;
   border-style: solid;
-  border-color: rgb(59.64, 59.64, 63.16);
+  border-color: rgb(59.64, 59.64, 34.12);
 }
 .mdc-card--outlined::after {
   border: none;
@@ -1918,9 +1918,9 @@ svg.mdc-button__icon {
   --mdc-ripple-fg-opacity: var(--mdc-ripple-press-opacity, 0.12);
 }
 .mdc-checkbox.mdc-checkbox--selected .mdc-checkbox__ripple::before, .mdc-checkbox.mdc-checkbox--selected .mdc-checkbox__ripple::after {
-  background-color: rgb(92.7, 92.7, 120);
+  background-color: rgb(118.2, 118.2, 133.5);
   /* @alternate */
-  background-color: var(--mdc-ripple-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
+  background-color: var(--mdc-ripple-color, var(--mdc-theme-secondary, rgb(118.2, 118.2, 133.5)));
 }
 .mdc-checkbox.mdc-checkbox--selected:hover .mdc-checkbox__ripple::before, .mdc-checkbox.mdc-checkbox--selected.mdc-ripple-surface--hover .mdc-checkbox__ripple::before {
   opacity: 0.04;
@@ -1947,9 +1947,9 @@ svg.mdc-button__icon {
 }
 .mdc-checkbox.mdc-ripple-upgraded--background-focused.mdc-checkbox--selected .mdc-checkbox__ripple::before,
 .mdc-checkbox.mdc-ripple-upgraded--background-focused.mdc-checkbox--selected .mdc-checkbox__ripple::after {
-  background-color: rgb(92.7, 92.7, 120);
+  background-color: rgb(118.2, 118.2, 133.5);
   /* @alternate */
-  background-color: var(--mdc-ripple-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
+  background-color: var(--mdc-ripple-color, var(--mdc-theme-secondary, rgb(118.2, 118.2, 133.5)));
 }
 .mdc-checkbox .mdc-checkbox__background {
   top: calc((40px - 18px) / 2);
@@ -1985,14 +1985,14 @@ svg.mdc-button__icon {
 .mdc-checkbox .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background,
 .mdc-checkbox .mdc-checkbox__native-control:enabled:indeterminate ~ .mdc-checkbox__background,
 .mdc-checkbox .mdc-checkbox__native-control[data-indeterminate=true]:enabled ~ .mdc-checkbox__background {
-  border-color: rgb(92.7, 92.7, 120);
+  border-color: rgb(118.2, 118.2, 133.5);
   /* @alternate */
-  border-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
-  background-color: rgb(92.7, 92.7, 120);
+  border-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(118.2, 118.2, 133.5)));
+  background-color: rgb(118.2, 118.2, 133.5);
   /* @alternate */
-  background-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
+  background-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(118.2, 118.2, 133.5)));
 }
-@keyframes mdc-checkbox-fade-in-background-8AFFFFFFFF5D5D7800000000FF5D5D78 {
+@keyframes mdc-checkbox-fade-in-background-8AFFFFFFFF76768600000000FF767686 {
   0% {
     border-color: rgba(255, 255, 255, 0.54);
     /* @alternate */
@@ -2000,22 +2000,22 @@ svg.mdc-button__icon {
     background-color: transparent;
   }
   50% {
-    border-color: rgb(92.7, 92.7, 120);
+    border-color: rgb(118.2, 118.2, 133.5);
     /* @alternate */
-    border-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
-    background-color: rgb(92.7, 92.7, 120);
+    border-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(118.2, 118.2, 133.5)));
+    background-color: rgb(118.2, 118.2, 133.5);
     /* @alternate */
-    background-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
+    background-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(118.2, 118.2, 133.5)));
   }
 }
-@keyframes mdc-checkbox-fade-out-background-8AFFFFFFFF5D5D7800000000FF5D5D78 {
+@keyframes mdc-checkbox-fade-out-background-8AFFFFFFFF76768600000000FF767686 {
   0%, 80% {
-    border-color: rgb(92.7, 92.7, 120);
+    border-color: rgb(118.2, 118.2, 133.5);
     /* @alternate */
-    border-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
-    background-color: rgb(92.7, 92.7, 120);
+    border-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(118.2, 118.2, 133.5)));
+    background-color: rgb(118.2, 118.2, 133.5);
     /* @alternate */
-    background-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
+    background-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(118.2, 118.2, 133.5)));
   }
   100% {
     border-color: rgba(255, 255, 255, 0.54);
@@ -2025,10 +2025,10 @@ svg.mdc-button__icon {
   }
 }
 .mdc-checkbox.mdc-checkbox--anim-unchecked-checked .mdc-checkbox__native-control:enabled ~ .mdc-checkbox__background, .mdc-checkbox.mdc-checkbox--anim-unchecked-indeterminate .mdc-checkbox__native-control:enabled ~ .mdc-checkbox__background {
-  animation-name: mdc-checkbox-fade-in-background-8AFFFFFFFF5D5D7800000000FF5D5D78;
+  animation-name: mdc-checkbox-fade-in-background-8AFFFFFFFF76768600000000FF767686;
 }
 .mdc-checkbox.mdc-checkbox--anim-checked-unchecked .mdc-checkbox__native-control:enabled ~ .mdc-checkbox__background, .mdc-checkbox.mdc-checkbox--anim-indeterminate-unchecked .mdc-checkbox__native-control:enabled ~ .mdc-checkbox__background {
-  animation-name: mdc-checkbox-fade-out-background-8AFFFFFFFF5D5D7800000000FF5D5D78;
+  animation-name: mdc-checkbox-fade-out-background-8AFFFFFFFF76768600000000FF767686;
 }
 .mdc-checkbox .mdc-checkbox__native-control[disabled]:not(:checked):not(:indeterminate):not([data-indeterminate=true]) ~ .mdc-checkbox__background {
   border-color: rgba(255, 255, 255, 0.38);
@@ -3271,10 +3271,10 @@ svg.mdc-button__icon {
   border-bottom-left-radius: 0;
 }
 .mdc-select--filled:not(.mdc-select--disabled) .mdc-select__anchor {
-  background-color: rgb(41.88, 41.88, 45.72);
+  background-color: rgb(41.88, 41.88, 14.04);
 }
 .mdc-select--filled.mdc-select--disabled .mdc-select__anchor {
-  background-color: rgb(37.44, 37.44, 41.36);
+  background-color: rgb(37.44, 37.44, 9.02);
 }
 .mdc-select--filled:not(.mdc-select--disabled) .mdc-line-ripple::before {
   border-bottom-color: rgba(255, 255, 255, 0.42);
@@ -7465,9 +7465,9 @@ https://github.com/material-components/material-components-web/issues/31
   transition: opacity 0.03s linear, transform 0.12s cubic-bezier(0, 0, 0.2, 1), height 250ms cubic-bezier(0, 0, 0.2, 1);
   /* @alternate */
   box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
-  background-color: #212125;
+  background-color: #212104;
   /* @alternate */
-  background-color: var(--mdc-theme-surface, #212125);
+  background-color: var(--mdc-theme-surface, #212104);
   color: #fff;
   /* @alternate */
   color: var(--mdc-theme-on-surface, #fff);
@@ -7845,9 +7845,9 @@ https://github.com/material-components/material-components-web/issues/31
 }
 
 .mdc-data-table {
-  background-color: #212125;
+  background-color: #212104;
   /* @alternate */
-  background-color: var(--mdc-theme-surface, #212125);
+  background-color: var(--mdc-theme-surface, #212104);
   border-radius: 4px;
   /* @alternate */
   border-radius: var(--mdc-shape-medium, 4px);
@@ -7921,9 +7921,9 @@ https://github.com/material-components/material-components-web/issues/31
 }
 
 .mdc-data-table__header-cell {
-  background-color: #212125;
+  background-color: #212104;
   /* @alternate */
-  background-color: var(--mdc-theme-surface, #212125);
+  background-color: var(--mdc-theme-surface, #212104);
 }
 
 .mdc-data-table__row--selected {
@@ -8341,9 +8341,9 @@ https://github.com/material-components/material-components-web/issues/31
 }
 
 .mdc-data-table__scrim {
-  background-color: #212125;
+  background-color: #212104;
   /* @alternate */
-  background-color: var(--mdc-theme-surface, #212125);
+  background-color: var(--mdc-theme-surface, #212104);
   height: 100%;
   opacity: 0.32;
   position: absolute;
@@ -9650,7 +9650,7 @@ https://github.com/material-components/material-components-web/issues/31
   vertical-align: 0;
 }
 .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-  background-color: rgb(41.88, 41.88, 45.72);
+  background-color: rgb(41.88, 41.88, 14.04);
 }
 .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple::before {
   border-bottom-color: rgba(255, 255, 255, 0.42);
@@ -10484,7 +10484,7 @@ https://github.com/material-components/material-components-web/issues/31
   cursor: default;
 }
 .mdc-text-field--disabled.mdc-text-field--filled {
-  background-color: rgb(37.44, 37.44, 41.36);
+  background-color: rgb(37.44, 37.44, 9.02);
 }
 .mdc-text-field--disabled.mdc-text-field--filled .mdc-text-field__ripple {
   display: none;
@@ -11338,9 +11338,9 @@ https://github.com/material-components/material-components-web/issues/31
 }
 
 .smui-top-app-bar--color-secondary {
-  background-color: rgb(92.7, 92.7, 120);
+  background-color: rgb(118.2, 118.2, 133.5);
   /* @alternate */
-  background-color: var(--mdc-theme-secondary, rgb(92.7, 92.7, 120));
+  background-color: var(--mdc-theme-secondary, rgb(118.2, 118.2, 133.5));
   color: #fff;
   /* @alternate */
   color: var(--mdc-theme-on-secondary, #fff);
