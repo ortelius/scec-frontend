@@ -934,9 +934,9 @@ svg.mdc-button__icon {
   --mdc-ripple-fg-opacity: var(--mdc-ripple-press-opacity, 0.12);
 }
 .smui-ripple-surface--secondary::before, .smui-ripple-surface--secondary::after {
-  background-color: #5d5d78;
+  background-color: rgb(92.7, 92.7, 120);
   /* @alternate */
-  background-color: var(--mdc-ripple-color, var(--mdc-theme-secondary, #5d5d78));
+  background-color: var(--mdc-ripple-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
 }
 .smui-ripple-surface--secondary:hover::before, .smui-ripple-surface--secondary.mdc-ripple-surface--hover::before {
   opacity: 0.04;
@@ -963,13 +963,13 @@ svg.mdc-button__icon {
 }
 
 .smui-button--color-secondary:not(:disabled) {
-  color: #5d5d78;
+  color: rgb(92.7, 92.7, 120);
 }
 .smui-button--color-secondary:not(:disabled) .mdc-button__icon {
-  color: #5d5d78;
+  color: rgb(92.7, 92.7, 120);
 }
 .smui-button--color-secondary.mdc-button--raised:not(:disabled), .smui-button--color-secondary.mdc-button--unelevated:not(:disabled) {
-  background-color: #5d5d78;
+  background-color: rgb(92.7, 92.7, 120);
 }
 .smui-button--color-secondary.mdc-button--raised:not(:disabled), .smui-button--color-secondary.mdc-button--unelevated:not(:disabled) {
   color: white;
@@ -1011,12 +1011,12 @@ svg.mdc-button__icon {
   color: #fff;
 }
 .smui-button--color-secondary.mdc-button--outlined:not(:disabled) {
-  border-color: #5d5d78;
+  border-color: rgb(92.7, 92.7, 120);
 }
 .smui-button--color-secondary .mdc-button__ripple::before, .smui-button--color-secondary .mdc-button__ripple::after {
-  background-color: #5d5d78;
+  background-color: rgb(92.7, 92.7, 120);
   /* @alternate */
-  background-color: var(--mdc-ripple-color, #5d5d78);
+  background-color: var(--mdc-ripple-color, rgb(92.7, 92.7, 120));
 }
 .smui-button--color-secondary:hover .mdc-button__ripple::before, .smui-button--color-secondary.mdc-ripple-surface--hover .mdc-button__ripple::before {
   opacity: 0.04;
@@ -1141,7 +1141,7 @@ svg.mdc-button__icon {
   box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0.2), 0px 0px 0px 0px rgba(0, 0, 0, 0.14), 0px 0px 0px 0px rgba(0, 0, 0, 0.12);
   border-width: 1px;
   border-style: solid;
-  border-color: #3c3c3f;
+  border-color: rgb(59.64, 59.64, 63.16);
 }
 .mdc-card--outlined::after {
   border: none;
@@ -1918,9 +1918,9 @@ svg.mdc-button__icon {
   --mdc-ripple-fg-opacity: var(--mdc-ripple-press-opacity, 0.12);
 }
 .mdc-checkbox.mdc-checkbox--selected .mdc-checkbox__ripple::before, .mdc-checkbox.mdc-checkbox--selected .mdc-checkbox__ripple::after {
-  background-color: #5d5d78;
+  background-color: rgb(92.7, 92.7, 120);
   /* @alternate */
-  background-color: var(--mdc-ripple-color, var(--mdc-theme-secondary, #5d5d78));
+  background-color: var(--mdc-ripple-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
 }
 .mdc-checkbox.mdc-checkbox--selected:hover .mdc-checkbox__ripple::before, .mdc-checkbox.mdc-checkbox--selected.mdc-ripple-surface--hover .mdc-checkbox__ripple::before {
   opacity: 0.04;
@@ -1947,9 +1947,9 @@ svg.mdc-button__icon {
 }
 .mdc-checkbox.mdc-ripple-upgraded--background-focused.mdc-checkbox--selected .mdc-checkbox__ripple::before,
 .mdc-checkbox.mdc-ripple-upgraded--background-focused.mdc-checkbox--selected .mdc-checkbox__ripple::after {
-  background-color: #5d5d78;
+  background-color: rgb(92.7, 92.7, 120);
   /* @alternate */
-  background-color: var(--mdc-ripple-color, var(--mdc-theme-secondary, #5d5d78));
+  background-color: var(--mdc-ripple-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
 }
 .mdc-checkbox .mdc-checkbox__background {
   top: calc((40px - 18px) / 2);
@@ -1985,12 +1985,12 @@ svg.mdc-button__icon {
 .mdc-checkbox .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background,
 .mdc-checkbox .mdc-checkbox__native-control:enabled:indeterminate ~ .mdc-checkbox__background,
 .mdc-checkbox .mdc-checkbox__native-control[data-indeterminate=true]:enabled ~ .mdc-checkbox__background {
-  border-color: #5d5d78;
+  border-color: rgb(92.7, 92.7, 120);
   /* @alternate */
-  border-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, #5d5d78));
-  background-color: #5d5d78;
+  border-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
+  background-color: rgb(92.7, 92.7, 120);
   /* @alternate */
-  background-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, #5d5d78));
+  background-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
 }
 @keyframes mdc-checkbox-fade-in-background-8AFFFFFFFF5D5D7800000000FF5D5D78 {
   0% {
@@ -2000,22 +2000,22 @@ svg.mdc-button__icon {
     background-color: transparent;
   }
   50% {
-    border-color: #5d5d78;
+    border-color: rgb(92.7, 92.7, 120);
     /* @alternate */
-    border-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, #5d5d78));
-    background-color: #5d5d78;
+    border-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
+    background-color: rgb(92.7, 92.7, 120);
     /* @alternate */
-    background-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, #5d5d78));
+    background-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
   }
 }
 @keyframes mdc-checkbox-fade-out-background-8AFFFFFFFF5D5D7800000000FF5D5D78 {
   0%, 80% {
-    border-color: #5d5d78;
+    border-color: rgb(92.7, 92.7, 120);
     /* @alternate */
-    border-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, #5d5d78));
-    background-color: #5d5d78;
+    border-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
+    background-color: rgb(92.7, 92.7, 120);
     /* @alternate */
-    background-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, #5d5d78));
+    background-color: var(--mdc-checkbox-checked-color, var(--mdc-theme-secondary, rgb(92.7, 92.7, 120)));
   }
   100% {
     border-color: rgba(255, 255, 255, 0.54);
@@ -3271,10 +3271,10 @@ svg.mdc-button__icon {
   border-bottom-left-radius: 0;
 }
 .mdc-select--filled:not(.mdc-select--disabled) .mdc-select__anchor {
-  background-color: #2a2a2e;
+  background-color: rgb(41.88, 41.88, 45.72);
 }
 .mdc-select--filled.mdc-select--disabled .mdc-select__anchor {
-  background-color: #252529;
+  background-color: rgb(37.44, 37.44, 41.36);
 }
 .mdc-select--filled:not(.mdc-select--disabled) .mdc-line-ripple::before {
   border-bottom-color: rgba(255, 255, 255, 0.42);
@@ -9650,7 +9650,7 @@ https://github.com/material-components/material-components-web/issues/31
   vertical-align: 0;
 }
 .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-  background-color: #2a2a2e;
+  background-color: rgb(41.88, 41.88, 45.72);
 }
 .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple::before {
   border-bottom-color: rgba(255, 255, 255, 0.42);
@@ -10484,7 +10484,7 @@ https://github.com/material-components/material-components-web/issues/31
   cursor: default;
 }
 .mdc-text-field--disabled.mdc-text-field--filled {
-  background-color: #252529;
+  background-color: rgb(37.44, 37.44, 41.36);
 }
 .mdc-text-field--disabled.mdc-text-field--filled .mdc-text-field__ripple {
   display: none;
@@ -11338,9 +11338,9 @@ https://github.com/material-components/material-components-web/issues/31
 }
 
 .smui-top-app-bar--color-secondary {
-  background-color: #5d5d78;
+  background-color: rgb(92.7, 92.7, 120);
   /* @alternate */
-  background-color: var(--mdc-theme-secondary, #5d5d78);
+  background-color: var(--mdc-theme-secondary, rgb(92.7, 92.7, 120));
   color: #fff;
   /* @alternate */
   color: var(--mdc-theme-on-secondary, #fff);

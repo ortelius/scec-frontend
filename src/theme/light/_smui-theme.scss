@@ -1,7 +1,5 @@
 @use 'sass:color';
 @use '@material/theme/color-palette';
-
-// Svelte Colors!
 @use '@material/theme/index' as theme with (
   $primary: color-palette.$blue-400,
   $secondary: color-palette.$grey-400,
@@ -10,6 +8,7 @@
   $error: color-palette.$red-900
 );
 
+// Svelte Colors!
 html,
 body {
   background-color: theme.$background;
@@ -92,8 +91,8 @@ h1 {
 
 .open-small {
   top: 6px !important;
-  height:18px !important;
-  width:18px !important;
+  height: 18px !important;
+  width: 18px !important;
   padding: 2px !important;
 }
 

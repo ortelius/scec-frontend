@@ -15,7 +15,7 @@ a {
 }
 
 a:visited {
-  color: #007dcf;
+  color: rgb(0, 124.8442408377, 207.35);
 }
 
 .swagger-ui * {
@@ -1187,7 +1187,7 @@ svg.mdc-button__icon {
   box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0.2), 0px 0px 0px 0px rgba(0, 0, 0, 0.14), 0px 0px 0px 0px rgba(0, 0, 0, 0.12);
   border-width: 1px;
   border-style: solid;
-  border-color: #e0e0e0;
+  border-color: rgb(224.4, 224.4, 224.4);
 }
 .mdc-card--outlined::after {
   border: none;
@@ -3317,10 +3317,10 @@ svg.mdc-button__icon {
   border-bottom-left-radius: 0;
 }
 .mdc-select--filled:not(.mdc-select--disabled) .mdc-select__anchor {
-  background-color: whitesmoke;
+  background-color: rgb(244.8, 244.8, 244.8);
 }
 .mdc-select--filled.mdc-select--disabled .mdc-select__anchor {
-  background-color: #fafafa;
+  background-color: rgb(249.9, 249.9, 249.9);
 }
 .mdc-select--filled:not(.mdc-select--disabled) .mdc-line-ripple::before {
   border-bottom-color: rgba(0, 0, 0, 0.42);
@@ -9696,7 +9696,7 @@ https://github.com/material-components/material-components-web/issues/31
   vertical-align: 0;
 }
 .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-  background-color: whitesmoke;
+  background-color: rgb(244.8, 244.8, 244.8);
 }
 .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple::before {
   border-bottom-color: rgba(0, 0, 0, 0.42);
@@ -10530,7 +10530,7 @@ https://github.com/material-components/material-components-web/issues/31
   cursor: default;
 }
 .mdc-text-field--disabled.mdc-text-field--filled {
-  background-color: #fafafa;
+  background-color: rgb(249.9, 249.9, 249.9);
 }
 .mdc-text-field--disabled.mdc-text-field--filled .mdc-text-field__ripple {
   display: none;
