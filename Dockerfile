@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY package*.json .
 
 # hadolint ignore=DL3041,DL3016
-RUN curl -fsSL https://rpm.nodesource.com/setup_21.x | bash -; \
+RUN curl -fsSL https://rpm.nodesource.com/setup_23.x | bash -; \
     dnf install nodejs -y; \
     npm install -g npm; \
     npm install --ignore-scripts; \

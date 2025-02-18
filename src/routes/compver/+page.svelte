@@ -104,8 +104,10 @@
         cells = mapTextFields(compverdetail);
         compinfo = cells[0];
         cells = cells.slice(1);
-        readme = (<string[]>compverdetail.readme.content).join("\n");
-        license = (<string[]>compverdetail.license.content).join("\n");
+
+        readme = (compverdetail.readme.content as string[]).join("\n");
+        license = (compverdetail.license.content as string[]).join("\n");
+
         swagger = JSON.stringify(compverdetail.swagger.content);
         pkgs = compverdetail.packages;
 
@@ -270,7 +272,7 @@
     <Card padded>
       <div class="cell_title">OpenApi</div>
       <Svroller width="100%" height="28em" alwaysVisible={true}>
-        <div id="swagger-ui" />
+        <div id="swagger-ui"></div>
       </Svroller>
     </Card>
   </LayoutCell>
