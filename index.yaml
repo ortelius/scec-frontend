@@ -2,6 +2,17 @@ apiVersion: v1
 entries:
   scec-frontend:
   - apiVersion: v2
+    appVersion: 11.0.970
+    created: "2025-03-03T23:42:22.218484322Z"
+    description: Frontend microservice
+    digest: 13b9bc60732de082541dcfd0a91c1189ddd7057e727bfb0ed9a7089cc60789c0
+    icon: https://ortelius.github.io/ortelius-charts/logo.png
+    name: scec-frontend
+    type: application
+    urls:
+    - https://github.com/ortelius/scec-frontend/releases/download/scec-frontend-11.0.970/scec-frontend-11.0.970.tgz
+    version: 11.0.970
+  - apiVersion: v2
     appVersion: 11.0.968
     created: "2025-03-03T06:31:00.031429617Z"
     description: Frontend microservice
@@ -3002,4 +3013,4 @@ entries:
     urls:
     - https://github.com/ortelius/scec-frontend/releases/download/scec-frontend-11.0.0/scec-frontend-11.0.0.tgz
     version: 11.0.0
-generated: "2025-03-03T06:31:00.031028469Z"
+generated: "2025-03-03T23:42:22.217755305Z"
