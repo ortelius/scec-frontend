@@ -1,52 +1,27 @@
 {
   "name": "scec-frontend",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
-  "engines": {
-    "npm": ">=10.0",
-    "node": ">=18.13 <23.0.0"
-  },
   "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0 --port 8080",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "prepare": "svelte-kit sync && cp node_modules/swagger-ui-dist/swagger-ui.css* static/swagger-ui-dist && npm run smui-theme-light && npm run smui-theme-dark && src/theme/create-dark-css.sh && npm run smui-theme && echo >> static/smui-light.css && echo >> static/smui-dark.css",
-    "smui-theme-light": "smui-theme compile static/smui-light.css -i src/theme/light -s expanded",
-    "smui-theme-dark": "smui-theme compile src/theme/work/smui-dark.css -i src/theme/dark -s expanded",
-    "smui-theme": "smui-theme compile static/smui-dark.css -i src/theme/work -s expanded",
-    "lint": "eslint . --ext .js,.svelte"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^15.5.4",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
-    "@mdi/js": "^7.4.47",
-    "@smui/button": "^7.0.0",
-    "@smui/card": "^7.0.0",
-    "@smui/common": "^7.0.0",
-    "@smui/icon-button": "^7.0.0",
-    "@smui/layout-grid": "^7.0.0",
-    "@smui/textfield": "^7.0.0",
-    "@smui/top-app-bar": "^7.0.0",
-    "@sveltejs/adapter-node": "^5.2.0",
-    "@sveltejs/kit": "^2.5.17",
-    "@types/lodash": "^4.17.5",
-    "eslint-plugin-svelte": "^3.0.0",
-    "smui-theme": "^7.0.0",
-    "svelte": "^5.20.1",
-    "svelte-check": "^4.0.0",
-    "tslib": "^2.6.3",
-    "typescript": "^5.5.2",
-    "vite": "^6.0.0"
-  },
-  "type": "module",
-  "dependencies": {
-    "@smui/data-table": "^7.0.0",
-    "lodash": "^4.17.21",
-    "marked": "^15.0.0",
-    "svrollbar": "^0.12.0",
-    "swagger-ui": "^5.17.14",
-    "swagger-ui-dist": "^5.17.14",
-    "swagger-ui-react": "^5.17.14",
-    "vike": "^0.4.177"
+    "@types/node": "^22.2.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "typescript": "^5.6.3",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "eslint": "^9.9.0",
+    "eslint-config-next": "^15.5.4"
   }
 }

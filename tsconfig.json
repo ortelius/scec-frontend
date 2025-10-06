@@ -1,13 +1,41 @@
 {
-  "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "strict": true
-  }
+    "target": "ES2017", // Modern JS, supports top-level await
+    "baseUrl": ".",               // Required for path mapping
+    "paths": {
+      "@/*": ["./*"]             // Map "@/something" -> project root
+    },
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ], // Include browser + latest JS libs
+    "allowJs": true, // Allow JS files
+    "skipLibCheck": true, // Skip type checking of node_modules
+    "strict": true, // Enable strict type checking
+    "forceConsistentCasingInFileNames": true, // Prevent file case mismatches
+    "noEmit": true, // Do not emit JS, Next handles it
+    "esModuleInterop": true, // Support default imports from CommonJS
+    "module": "ESNext", // Use ESNext modules
+    "moduleResolution": "Node", // Node-style module resolution
+    "resolveJsonModule": true, // Allow importing JSON files
+    "isolatedModules": true, // Required for Next.js
+    "jsx": "preserve", // Preserve JSX for Next.js
+    "incremental": true // Enable incremental builds
+    ,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
