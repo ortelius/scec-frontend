@@ -1,41 +1,29 @@
 {
   "compilerOptions": {
-    "target": "ES2017", // Modern JS, supports top-level await
-    "baseUrl": ".",               // Required for path mapping
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]             // Map "@/something" -> project root
+      "@/*": ["./*"]
     },
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ESNext"
-    ], // Include browser + latest JS libs
-    "allowJs": true, // Allow JS files
-    "skipLibCheck": true, // Skip type checking of node_modules
-    "strict": true, // Enable strict type checking
-    "forceConsistentCasingInFileNames": true, // Prevent file case mismatches
-    "noEmit": true, // Do not emit JS, Next handles it
-    "esModuleInterop": true, // Support default imports from CommonJS
-    "module": "ESNext", // Use ESNext modules
-    "moduleResolution": "Node", // Node-style module resolution
-    "resolveJsonModule": true, // Allow importing JSON files
-    "isolatedModules": true, // Required for Next.js
-    "jsx": "preserve", // Preserve JSX for Next.js
-    "incremental": true // Enable incremental builds
-    ,
     "plugins": [
       {
         "name": "next"
       }
     ]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "next-env.d.ts",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", "next-env.d.ts", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", ".next", "dist", "out", "coverage"]
 }

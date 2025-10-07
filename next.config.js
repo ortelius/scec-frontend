@@ -4,7 +4,6 @@ const nextConfig = {
     config.resolve.alias['@'] = __dirname
     return config
   },
-  outputFileTracingRoot: __dirname
 }
 
 module.exports = nextConfig
