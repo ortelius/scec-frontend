@@ -1,54 +1,28 @@
 // eslint.config.js
-import typescript from '@typescript-eslint/eslint-plugin'
-import react from 'eslint-plugin-react'
-import reactHooks from 'eslint-plugin-react-hooks'
-import importPlugin from 'eslint-plugin-import'
-import jsxA11y from 'eslint-plugin-jsx-a11y'
+import { FlatCompat } from '@eslint/eslintrc'
+import js from '@eslint/js'
+import typescriptParser from '@typescript-eslint/parser'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+  recommendedConfig: js.configs.recommended
+})
 
 export default [
+  ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
     files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
     languageOptions: {
-      parser: '@typescript-eslint/parser',
+      parser: typescriptParser,
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        ecmaFeatures: {
-          jsx: true
-        }
-      },
-      env: {
-        browser: true,
-        node: true,
-        es2024: true
-      }
-    },
-    plugins: {
-      '@typescript-eslint': typescript,
-      react,
-      'react-hooks': reactHooks,
-      import: importPlugin,
-      'jsx-a11y': jsxA11y
-    },
-    extends: [
-      'eslint:recommended',
-      'plugin:@typescript-eslint/recommended',
-      'plugin:import/recommended',
-      'plugin:react/recommended',
-      'plugin:react-hooks/recommended',
-      'plugin:jsx-a11y/recommended',
-      'next/core-web-vitals'
-    ],
-    settings: {
-      react: {
-        version: 'detect'
-      },
-      'import/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-          project: './tsconfig.json'
-        },
-        node: true
+        project: './tsconfig.json'
       }
     },
     rules: {
@@ -71,14 +45,17 @@ export default [
       'jsx-a11y/alt-text': 'warn',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-debugger': 'warn'
-    },
-    ignorePatterns: [
+    }
+  },
+  {
+    ignores: [
       'node_modules/',
       '.next/',
       'dist/',
       'out/',
       'coverage/',
       '*.config.js',
+      '*.config.mjs',
       '*.config.cjs',
       'megalinter-reports/'
     ]

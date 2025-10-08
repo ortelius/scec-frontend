@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+
 import Header from '@/components/Header'
 import SearchResults from '@/components/SearchResults'
 

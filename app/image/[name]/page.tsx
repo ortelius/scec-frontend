@@ -1,8 +1,9 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import Header from '@/components/Header'
 import { useState } from 'react'
+
+import Header from '@/components/Header'
 import { getImageByName } from '@/lib/mockData'
 
 export default function ImageDetailPage() {
