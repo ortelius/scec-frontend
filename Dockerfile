@@ -17,7 +17,8 @@ RUN curl -fsSL https://rpm.nodesource.com/setup_23.x | bash -; \
 
 COPY . .
 
-RUN npm run prepare &&\
-  npm run build
+EXPOSE 3000
 
-CMD ["npm", "run", "preview"]
+RUN npm run build
+
+CMD ["npm", "run", "start"]
