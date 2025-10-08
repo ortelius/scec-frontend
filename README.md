@@ -1,38 +1,49 @@
-# create-svelte
+# SCEC Frontend
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+A Next.js 14 application that mimics the Ortelius search interface.
 
-## Creating a project
+## Getting Started
 
-If you're seeing this, you've probably already done this step. Congrats!
-
+1. Install dependencies:
 ```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
+npm install
 ```
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
+2. Run the development server:
 ```bash
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+3. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To create a production version of your app:
+## Features
 
-```bash
-npm run build
-```
+- Search results page with grid layout (no landing page)
+- Grid layout: 3 columns on desktop, 2 on tablet, 1 on mobile
+- Left sidebar with filter options (Image Type, Operating System, Architectures)
+- Functional filters that update results in real-time
+- Category tabs (All, Images, Plugins)
+- Search functionality in header
+- Click on any card to view detailed information
+- Detail page with full image information, tags, and pull command
+- Back navigation from detail page
+- Responsive design matching Ortelius's layout
+- Mock data for demonstration
 
-You can preview the production build with `npm run preview`.
+## Tech Stack
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+- Next.js 14 (App Router)
+- React 18
+- TypeScript
+- Tailwind CSS
+
+## Routes
+
+- `/` - Main search page with grid of images and filters
+- `/image/[name]` - Detail page for specific image (e.g., `/image/nginx`)
+
+## Filter Options
+
+- **Image Type**: Official Images, Verified Publisher
+- **Operating System**: Linux, Windows
+- **Architectures**: ARM 64, AMD64, ARM
