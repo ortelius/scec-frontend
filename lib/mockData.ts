@@ -37,7 +37,7 @@ export const mockResults: ImageData[] = [
     tags: ['latest', 'stable', 'alpine', '1.25', '1.24'],
     vulnerabilities: { critical: 0, high: 2, medium: 5, low: 8 },
     dependencies: 127,
-    longDescription: 'Nginx (pronounced "engine-x") is an open source reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, as well as a load balancer, HTTP cache, and a web server (origin server).\n\nThe nginx project started with a strong focus on high concurrency, high performance and low memory usage. It is licensed under the 2-clause BSD-like license and it runs on Linux, BSD variants, Mac OS X, Solaris, AIX, HP-UX, as well as on other *nix flavors. It also has a proof of concept port for Microsoft Windows.',
+    longDescription: 'Nginx (pronounced "engine-x") is an open source reverse proxy server for HTTP, HTTPS, SMTP, POP3, and IMAP protocols, as well as a load balancer, HTTP cache, and a web server (origin server).\n\nThe nginx project started with a strong focus on high concurrency, high performance and low memory usage. It is licensed under the 2-clause BSD-like license and it runs on Linux, BSD variants, Mac OS X, Solaris, AIX, HP-UX, as well as on other *nix flavors. It also has a proof of concept port for Microsoft Windows.'
   },
   {
     name: 'ubuntu',
@@ -54,7 +54,7 @@ export const mockResults: ImageData[] = [
     tags: ['latest', '22.04', '20.04', 'jammy', 'focal'],
     vulnerabilities: { critical: 1, high: 4, medium: 12, low: 15 },
     dependencies: 342,
-    longDescription: 'Ubuntu is a Debian-based Linux operating system that runs from the desktop to the cloud, to all your internet connected things. It is the world\'s most popular operating system across public clouds and OpenStack clouds.\n\nUbuntu is developed by Canonical and the community in a meritocratic governance model. Canonical provides security updates and support for each Ubuntu release, starting from the release date and until the release reaches its designated end-of-life (EOL) date.',
+    longDescription: 'Ubuntu is a Debian-based Linux operating system that runs from the desktop to the cloud, to all your internet connected things. It is the world\'s most popular operating system across public clouds and OpenStack clouds.\n\nUbuntu is developed by Canonical and the community in a meritocratic governance model. Canonical provides security updates and support for each Ubuntu release, starting from the release date and until the release reaches its designated end-of-life (EOL) date.'
   },
   {
     name: 'postgres',
@@ -71,7 +71,7 @@ export const mockResults: ImageData[] = [
     tags: ['latest', '16', '15', '14', 'alpine'],
     vulnerabilities: { critical: 0, high: 1, medium: 3, low: 6 },
     dependencies: 245,
-    longDescription: 'PostgreSQL, often simply "Postgres", is an object-relational database management system (ORDBMS) with an emphasis on extensibility and standards-compliance.\n\nPostgreSQL is developed by the PostgreSQL Global Development Group, a diverse group of many companies and individual contributors. It is free and open-source, released under the terms of the PostgreSQL License, a permissive free-software license.',
+    longDescription: 'PostgreSQL, often simply "Postgres", is an object-relational database management system (ORDBMS) with an emphasis on extensibility and standards-compliance.\n\nPostgreSQL is developed by the PostgreSQL Global Development Group, a diverse group of many companies and individual contributors. It is free and open-source, released under the terms of the PostgreSQL License, a permissive free-software license.'
   },
   {
     name: 'node',
@@ -88,7 +88,7 @@ export const mockResults: ImageData[] = [
     tags: ['latest', '20', '18', 'lts', 'alpine'],
     vulnerabilities: { critical: 2, high: 6, medium: 10, low: 20 },
     dependencies: 1247,
-    longDescription: 'Node.js is a software platform for scalable server-side and networking applications. Node.js applications are written in JavaScript and can be run within the Node.js runtime on Mac OS X, Windows, and Linux without changes.\n\nNode.js applications are designed to maximize throughput and efficiency, using non-blocking I/O and asynchronous events. Node.js applications run single-threaded, although Node.js uses multiple threads for file and network events.',
+    longDescription: 'Node.js is a software platform for scalable server-side and networking applications. Node.js applications are written in JavaScript and can be run within the Node.js runtime on Mac OS X, Windows, and Linux without changes.\n\nNode.js applications are designed to maximize throughput and efficiency, using non-blocking I/O and asynchronous events. Node.js applications run single-threaded, although Node.js uses multiple threads for file and network events.'
   },
   {
     name: 'redis',
@@ -105,7 +105,7 @@ export const mockResults: ImageData[] = [
     tags: ['latest', '7', '6', 'alpine'],
     vulnerabilities: { critical: 0, high: 0, medium: 2, low: 4 },
     dependencies: 89,
-    longDescription: 'Redis is an open-source, networked, in-memory, key-value data store with optional durability. It is written in ANSI C. The development of Redis is sponsored by Redis Labs today; before that, it was sponsored by Pivotal and VMware.\n\nRedis supports different kinds of abstract data structures, such as strings, lists, maps, sets, sorted sets, hyperloglogs, bitmaps, streams and spatial indexes.',
+    longDescription: 'Redis is an open-source, networked, in-memory, key-value data store with optional durability. It is written in ANSI C. The development of Redis is sponsored by Redis Labs today; before that, it was sponsored by Pivotal and VMware.\n\nRedis supports different kinds of abstract data structures, such as strings, lists, maps, sets, sorted sets, hyperloglogs, bitmaps, streams and spatial indexes.'
   },
   {
     name: 'mysql',
@@ -122,7 +122,7 @@ export const mockResults: ImageData[] = [
     tags: ['latest', '8', '5.7', 'oracle'],
     vulnerabilities: { critical: 0, high: 3, medium: 7, low: 11 },
     dependencies: 298,
-    longDescription: 'MySQL is the world\'s most popular open source database. With its proven performance, reliability and ease-of-use, MySQL has become the leading database choice for web-based applications.\n\nMySQL is a relational database management system. A relational database stores data in separate tables rather than putting all the data in one big storeroom. This adds speed and flexibility.',
+    longDescription: 'MySQL is the world\'s most popular open source database. With its proven performance, reliability and ease-of-use, MySQL has become the leading database choice for web-based applications.\n\nMySQL is a relational database management system. A relational database stores data in separate tables rather than putting all the data in one big storeroom. This adds speed and flexibility.'
   },
   {
     name: 'mongo',
@@ -139,7 +139,7 @@ export const mockResults: ImageData[] = [
     tags: ['latest', '7', '6', '5'],
     vulnerabilities: { critical: 1, high: 2, medium: 8, low: 14 },
     dependencies: 412,
-    longDescription: 'MongoDB is a source-available cross-platform document-oriented database program. Classified as a NoSQL database program, MongoDB uses JSON-like documents with optional schemas.\n\nMongoDB is developed by MongoDB Inc. and licensed under the Server Side Public License which is deemed non-free by several distributions.',
+    longDescription: 'MongoDB is a source-available cross-platform document-oriented database program. Classified as a NoSQL database program, MongoDB uses JSON-like documents with optional schemas.\n\nMongoDB is developed by MongoDB Inc. and licensed under the Server Side Public License which is deemed non-free by several distributions.'
   },
   {
     name: 'python',
@@ -156,7 +156,7 @@ export const mockResults: ImageData[] = [
     tags: ['latest', '3.12', '3.11', '3.10', 'alpine'],
     vulnerabilities: { critical: 0, high: 1, medium: 4, low: 9 },
     dependencies: 567,
-    longDescription: 'Python is an interpreted, interactive, object-oriented, open-source programming language. It incorporates modules, exceptions, dynamic typing, very high level dynamic data types, and classes.\n\nPython combines remarkable power with very clear syntax. It has interfaces to many system calls and libraries, as well as to various window systems, and is extensible in C or C++.',
+    longDescription: 'Python is an interpreted, interactive, object-oriented, open-source programming language. It incorporates modules, exceptions, dynamic typing, very high level dynamic data types, and classes.\n\nPython combines remarkable power with very clear syntax. It has interfaces to many system calls and libraries, as well as to various window systems, and is extensible in C or C++.'
   },
   {
     name: 'alpine',
@@ -173,7 +173,7 @@ export const mockResults: ImageData[] = [
     tags: ['latest', '3.19', '3.18', 'edge'],
     vulnerabilities: { critical: 0, high: 0, medium: 1, low: 2 },
     dependencies: 42,
-    longDescription: 'Alpine Linux is a Linux distribution built around musl libc and BusyBox. The image is only 5 MB in size and has access to a package repository that is much more complete than other BusyBox based images.\n\nThis makes Alpine Linux a great image base for utilities and even production applications. Alpine Linux is designed for security, simplicity and resource efficiency.',
+    longDescription: 'Alpine Linux is a Linux distribution built around musl libc and BusyBox. The image is only 5 MB in size and has access to a package repository that is much more complete than other BusyBox based images.\n\nThis makes Alpine Linux a great image base for utilities and even production applications. Alpine Linux is designed for security, simplicity and resource efficiency.'
   },
   {
     name: 'httpd',
@@ -190,7 +190,7 @@ export const mockResults: ImageData[] = [
     tags: ['latest', '2.4', 'alpine'],
     vulnerabilities: { critical: 0, high: 2, medium: 5, low: 7 },
     dependencies: 156,
-    longDescription: 'The Apache HTTP Server, colloquially called Apache, is a free and open-source cross-platform web server software, released under the terms of Apache License 2.0.\n\nApache is developed and maintained by an open community of developers under the auspices of the Apache Software Foundation.',
+    longDescription: 'The Apache HTTP Server, colloquially called Apache, is a free and open-source cross-platform web server software, released under the terms of Apache License 2.0.\n\nApache is developed and maintained by an open community of developers under the auspices of the Apache Software Foundation.'
   },
   {
     name: 'golang',
@@ -207,7 +207,7 @@ export const mockResults: ImageData[] = [
     tags: ['latest', '1.21', '1.20', 'alpine'],
     vulnerabilities: { critical: 0, high: 1, medium: 3, low: 5 },
     dependencies: 189,
-    longDescription: 'Go is an open source programming language that makes it easy to build simple, reliable, and efficient software. Go is expressive, concise, clean, and efficient.\n\nGo compiles quickly to machine code yet has the convenience of garbage collection and the power of run-time reflection. It\'s a fast, statically typed, compiled language that feels like a dynamically typed, interpreted language.',
+    longDescription: 'Go is an open source programming language that makes it easy to build simple, reliable, and efficient software. Go is expressive, concise, clean, and efficient.\n\nGo compiles quickly to machine code yet has the convenience of garbage collection and the power of run-time reflection. It\'s a fast, statically typed, compiled language that feels like a dynamically typed, interpreted language.'
   },
   {
     name: 'php',
@@ -224,10 +224,10 @@ export const mockResults: ImageData[] = [
     tags: ['latest', '8.3', '8.2', 'apache', 'fpm'],
     vulnerabilities: { critical: 3, high: 8, medium: 15, low: 22 },
     dependencies: 834,
-    longDescription: 'PHP is a popular general-purpose scripting language that is especially suited to web development. Fast, flexible and pragmatic, PHP powers everything from your blog to the most popular websites in the world.\n\nPHP is a server-side scripting language designed primarily for web development but also used as a general-purpose programming language.',
-  },
+    longDescription: 'PHP is a popular general-purpose scripting language that is especially suited to web development. Fast, flexible and pragmatic, PHP powers everything from your blog to the most popular websites in the world.\n\nPHP is a server-side scripting language designed primarily for web development but also used as a general-purpose programming language.'
+  }
 ]
 
-export function getImageByName(name: string): ImageData | undefined {
+export function getImageByName (name: string): ImageData | undefined {
   return mockResults.find(img => img.name.toLowerCase() === name.toLowerCase())
 }

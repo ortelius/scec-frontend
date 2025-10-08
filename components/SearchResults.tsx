@@ -70,7 +70,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
           <div className="flex-1">
             <div className="mb-6">
               <h2 className="text-2xl font-semibold text-gray-900">
-                {query ? `Search results for "${query}"` : 'Releases'}
+                {query ? `Search results for "${query}"` : 'Project Releases'}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
                 {filteredResults.length.toLocaleString()} results
