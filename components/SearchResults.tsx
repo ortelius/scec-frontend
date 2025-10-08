@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+
 import { mockResults } from '@/lib/mockData'
 import FilterSidebar from '@/components/FilterSidebar'
 
