@@ -11,7 +11,7 @@ COPY package*.json .
 RUN curl -fsSL https://rpm.nodesource.com/setup_23.x | bash -; \
     dnf install nodejs -y; \
     npm install -g npm; \
-    npm install --ignore-scripts; \
+    npm install; \
     dnf upgrade -y; \
     dnf clean all
 
