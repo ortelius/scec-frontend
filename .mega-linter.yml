@@ -1,20 +1,53 @@
+# .mega-linter.yml
+---
 APPLY_FIXES: all
 SHOW_ELAPSED_TIME: true
+PRINT_ALPACA: false
 FILEIO_REPORTER: false
+VALIDATE_ALL_CODEBASE: true
+
 YAML_V8R_FILTER_REGEX_EXCLUDE: .mega-linter.yml
 YAML_PRETTIER_FILTER_REGEX_EXCLUDE: templates/
 YAML_YAMLLINT_FILTER_REGEX_EXCLUDE: templates/
+
+# Ignore build artifacts and templates
+FILTER_REGEX_EXCLUDE: |
+  (node_modules|.next|dist|out|coverage|templates)
+
+# Disable unnecessary or conflicting linters
 DISABLE_LINTERS:
+  - MARKDOWN_MARKDOWN_LINK_CHECK
+  - REPOSITORY_CHECKOV
+  - REPOSITORY_DEVSKIM
   - REPOSITORY_DUSTILOCK
   - REPOSITORY_GIT_DIFF
-  - REPOSITORY_TRIVY
-  - REPOSITORY_DEVSKIM
-  - REPOSITORY_CHECKOV
-  - REPOSITORY_KICS
   - REPOSITORY_GRYPE
-  - MARKDOWN_MARKDOWN_LINK_CHECK
+  - REPOSITORY_KICS
+  - REPOSITORY_TRIVY
+  - REPOSITORY_TRIVY_SBOM
   - CSS_STYLELINT
-  - CSS_SCSS_LINT
+
 DISABLE:
   - COPYPASTE
   - SPELL
+
+TSX_ESLINT_COMMAND_REMOVE_ARGUMENTS:
+  - --ignore-path
+  - /tmp/lint/.eslintignore
+
+TSX_ESLINT_CLI_EXECUTABLE:
+  - /tmp/lint/node_modules/.bin/eslint
+
+TYPESCRIPT_ES_COMMAND_REMOVE_ARGUMENTS:
+  - --ignore-path
+  - /tmp/lint/.eslintignore
+
+TYPESCRIPT_ES_CLI_EXECUTABLE:
+  - /tmp/lint/node_modules/.bin/eslint
+
+# Install local dependencies before running
+PRE_COMMANDS:
+  - command: |
+      npm remove -g eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint-config-next
+      npm install --no-save eslint@^9 @typescript-eslint/parser@^8 @typescript-eslint/eslint-plugin@^8 eslint-config-next@^15 stylelint-config-tailwindcss
+    cwd: workspace
