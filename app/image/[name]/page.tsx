@@ -196,7 +196,7 @@ export default function ImageDetailPage() {
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
                 Vulnerabilities ({release.vulnerabilities.length})
               </h2>
-              
+
               <div className="flex gap-4 mb-6">
                 {vulnCounts.critical > 0 && (
                   <div className="flex items-center gap-2 px-4 py-2 bg-red-50 rounded-lg">
