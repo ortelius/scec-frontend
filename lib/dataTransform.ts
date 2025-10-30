@@ -102,7 +102,10 @@ export function transformAffectedReleasesToImageData(
 
     // Extract unique packages (dependencies count)
     const uniquePackages = new Set(releases.map(r => r.package))
-    const dependencies = uniquePackages.size
+    const packageCount = uniquePackages.size
+
+    // Use dependency_count from the first release (should be same for all)
+    const dependencyCount = firstRelease.dependency_count || packageCount
 
     // Determine if official/verified (simplified logic)
     const isOfficial = firstRelease.project_type === 'docker' ||
@@ -124,17 +127,18 @@ export function transformAffectedReleasesToImageData(
       version: firstRelease.release_version,
       releaseDate: firstRelease.published || new Date().toISOString(),
       publisher: firstRelease.project_type === 'docker' ? 'Docker Official Image' : 'Community',
-      description: `${firstRelease.project_type} release with ${dependencies} dependencies`,
-      pulls: dependencies > 100 ? '1B+' : dependencies > 50 ? '500M+' : '100M+',
+      description: `${firstRelease.project_type} release with ${dependencyCount} dependencies`,
+      pulls: dependencyCount > 100 ? '1B+' : dependencyCount > 50 ? '500M+' : '100M+',
       updated: getRelativeTime(mostRecentDate.toISOString()),
       verified: isVerified,
       official: isOfficial,
       tags: ['latest', firstRelease.release_version, firstRelease.project_type],
       longDescription: `${firstRelease.release_name} version ${firstRelease.release_version}`,
       vulnerabilities: vulnCounts,
-      dependencies,
+      dependency_count: dependencyCount,
       signed: isSigned,
       openssfScore,
+      syncedEndpoints: firstRelease.synced_endpoint_count || 0,
     })
   })
 
