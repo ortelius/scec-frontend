@@ -58,8 +58,8 @@ export const GET_AFFECTED_RELEASES = `
       release_version
       content_sha
       project_type
-      dependency_count        
-      vulnerability_count     
+      dependency_count
+      vulnerability_count
     }
   }
 `

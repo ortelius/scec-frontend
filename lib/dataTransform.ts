@@ -105,7 +105,7 @@ export function transformAffectedReleasesToImageData(
     const dependencies = uniquePackages.size
 
     // Determine if official/verified (simplified logic)
-    const isOfficial = firstRelease.project_type === 'docker' || 
+    const isOfficial = firstRelease.project_type === 'docker' ||
                        firstRelease.release_name.toLowerCase().includes('official')
     const isVerified = vulnCounts.critical === 0 && vulnCounts.high < 3
     const isSigned = firstRelease.content_sha !== ''
