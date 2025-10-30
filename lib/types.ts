@@ -31,6 +31,8 @@ export interface AffectedRelease {
   release_version: string
   content_sha: string
   project_type: string
+  dependency_count: number
+  synced_endpoint_count: number
 }
 
 export interface SBOM {
@@ -73,9 +75,10 @@ export interface ImageData {
     medium: number
     low: number
   }
-  dependencies: number
+  dependency_count: number
   signed: boolean
   openssfScore: number
+  syncedEndpoints: number
 }
 
 export interface GetAffectedReleasesResponse {
