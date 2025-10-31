@@ -5,14 +5,18 @@ interface FilterSidebarProps {
     vulnerabilityScore: string[]
     openssfScore: string[]
     name: string
+    status?: string[]
+    environment?: string[]
+    endpointType?: string[]
   }
   setFilters: (filters: any) => void
+  selectedCategory: string
 }
 
-export default function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
-  const handleCheckboxChange = (category: 'vulnerabilityScore' | 'openssfScore', value: string) => {
+export default function FilterSidebar({ filters, setFilters, selectedCategory }: FilterSidebarProps) {
+  const handleCheckboxChange = (category: 'vulnerabilityScore' | 'openssfScore' | 'status' | 'environment' | 'endpointType', value: string) => {
     setFilters((prev: any) => {
-      const currentValues = prev[category]
+      const currentValues = prev[category] || []
       const newValues = currentValues.includes(value)
         ? currentValues.filter((v: string) => v !== value)
         : [...currentValues, value]
@@ -36,10 +40,19 @@ export default function FilterSidebar({ filters, setFilters }: FilterSidebarProp
       vulnerabilityScore: [],
       openssfScore: [],
       name: '',
+      status: [],
+      environment: [],
+      endpointType: [],
     })
   }
 
-  const hasActiveFilters = filters.vulnerabilityScore.length > 0 || filters.openssfScore.length > 0 || filters.name !== ''
+  const hasActiveFilters = 
+    filters.vulnerabilityScore.length > 0 || 
+    filters.openssfScore.length > 0 || 
+    filters.name !== '' ||
+    (filters.status && filters.status.length > 0) ||
+    (filters.environment && filters.environment.length > 0) ||
+    (filters.endpointType && filters.endpointType.length > 0)
 
   return (
     <aside className="w-64 flex-shrink-0">
@@ -67,89 +80,216 @@ export default function FilterSidebar({ filters, setFilters }: FilterSidebarProp
           />
         </div>
 
-        <div className="mb-6">
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">Vulnerability Score</h4>
-          <div className="space-y-2">
-            <label className="flex items-center cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={filters.vulnerabilityScore.includes('critical')}
-                onChange={() => handleCheckboxChange('vulnerabilityScore', 'critical')}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Critical</span>
-            </label>
-            <label className="flex items-center cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={filters.vulnerabilityScore.includes('high')}
-                onChange={() => handleCheckboxChange('vulnerabilityScore', 'high')}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">High</span>
-            </label>
-            <label className="flex items-center cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={filters.vulnerabilityScore.includes('medium')}
-                onChange={() => handleCheckboxChange('vulnerabilityScore', 'medium')}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Medium</span>
-            </label>
-            <label className="flex items-center cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={filters.vulnerabilityScore.includes('low')}
-                onChange={() => handleCheckboxChange('vulnerabilityScore', 'low')}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Low</span>
-            </label>
-            <label className="flex items-center cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={filters.vulnerabilityScore.includes('clean')}
-                onChange={() => handleCheckboxChange('vulnerabilityScore', 'clean')}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Clean</span>
-            </label>
-          </div>
-        </div>
+        {/* Synced Endpoints specific filters */}
+        {selectedCategory === 'image' && (
+          <>
+            <div className="mb-6">
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">Status</h4>
+              <div className="space-y-2">
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.status?.includes('active') || false}
+                    onChange={() => handleCheckboxChange('status', 'active')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Active</span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.status?.includes('inactive') || false}
+                    onChange={() => handleCheckboxChange('status', 'inactive')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Inactive</span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.status?.includes('error') || false}
+                    onChange={() => handleCheckboxChange('status', 'error')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Error</span>
+                </label>
+              </div>
+            </div>
 
-        <div>
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">OpenSSF Score</h4>
-          <div className="space-y-2">
-            <label className="flex items-center cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={filters.openssfScore.includes('high')}
-                onChange={() => handleCheckboxChange('openssfScore', 'high')}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">High (8.0+)</span>
-            </label>
-            <label className="flex items-center cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={filters.openssfScore.includes('medium')}
-                onChange={() => handleCheckboxChange('openssfScore', 'medium')}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Medium (6.0-7.9)</span>
-            </label>
-            <label className="flex items-center cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={filters.openssfScore.includes('low')}
-                onChange={() => handleCheckboxChange('openssfScore', 'low')}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Low (&lt;6.0)</span>
-            </label>
-          </div>
-        </div>
+            <div className="mb-6">
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">Environment</h4>
+              <div className="space-y-2">
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.environment?.includes('production') || false}
+                    onChange={() => handleCheckboxChange('environment', 'production')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Production</span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.environment?.includes('staging') || false}
+                    onChange={() => handleCheckboxChange('environment', 'staging')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Staging</span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.environment?.includes('development') || false}
+                    onChange={() => handleCheckboxChange('environment', 'development')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Development</span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.environment?.includes('test') || false}
+                    onChange={() => handleCheckboxChange('environment', 'test')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Test</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">Endpoint Type</h4>
+              <div className="space-y-2">
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.endpointType?.includes('kubernetes') || false}
+                    onChange={() => handleCheckboxChange('endpointType', 'kubernetes')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Kubernetes</span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.endpointType?.includes('docker') || false}
+                    onChange={() => handleCheckboxChange('endpointType', 'docker')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Docker</span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.endpointType?.includes('vm') || false}
+                    onChange={() => handleCheckboxChange('endpointType', 'vm')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">VM</span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.endpointType?.includes('serverless') || false}
+                    onChange={() => handleCheckboxChange('endpointType', 'serverless')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Serverless</span>
+                </label>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Project Releases and Vulnerabilities filters */}
+        {(selectedCategory === 'all' || selectedCategory === 'plugin') && (
+          <>
+            <div className="mb-6">
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">Vulnerability Score</h4>
+              <div className="space-y-2">
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.vulnerabilityScore.includes('critical')}
+                    onChange={() => handleCheckboxChange('vulnerabilityScore', 'critical')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Critical</span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.vulnerabilityScore.includes('high')}
+                    onChange={() => handleCheckboxChange('vulnerabilityScore', 'high')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">High</span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.vulnerabilityScore.includes('medium')}
+                    onChange={() => handleCheckboxChange('vulnerabilityScore', 'medium')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Medium</span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.vulnerabilityScore.includes('low')}
+                    onChange={() => handleCheckboxChange('vulnerabilityScore', 'low')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Low</span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.vulnerabilityScore.includes('clean')}
+                    onChange={() => handleCheckboxChange('vulnerabilityScore', 'clean')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Clean</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">OpenSSF Score</h4>
+              <div className="space-y-2">
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.openssfScore.includes('high')}
+                    onChange={() => handleCheckboxChange('openssfScore', 'high')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">High (8.0+)</span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.openssfScore.includes('medium')}
+                    onChange={() => handleCheckboxChange('openssfScore', 'medium')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Medium (6.0-7.9)</span>
+                </label>
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={filters.openssfScore.includes('low')}
+                    onChange={() => handleCheckboxChange('openssfScore', 'low')}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Low (&lt;6.0)</span>
+                </label>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </aside>
   )

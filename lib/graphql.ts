@@ -101,3 +101,42 @@ export const GET_RELEASE = `
     }
   }
 `
+
+// Query to get affected endpoints for a release
+export const GET_AFFECTED_ENDPOINTS = `
+  query GetAffectedEndpoints($name: String!, $version: String!) {
+    affectedEndpoints(name: $name, version: $version) {
+      endpoint_name
+      endpoint_url
+      endpoint_type
+      environment
+      last_sync
+      status
+    }
+  }
+`
+
+// Query to get all synced endpoints with aggregated data
+export const GET_SYNCED_ENDPOINTS = `
+  query GetSyncedEndpoints($limit: Int) {
+    syncedEndpoints(limit: $limit) {
+      endpoint_name
+      endpoint_url
+      endpoint_type
+      environment
+      status
+      last_sync
+      release_count
+      total_vulnerabilities {
+        critical
+        high
+        medium
+        low
+      }
+      releases {
+        release_name
+        release_version
+      }
+    }
+  }
+`

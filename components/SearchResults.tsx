@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 import FilterSidebar from '@/components/FilterSidebar'
-import { graphqlQuery, GET_AFFECTED_RELEASES } from '@/lib/graphql'
-import { GetAffectedReleasesResponse, ImageData } from '@/lib/types'
-import { transformAffectedReleasesToImageData } from '@/lib/dataTransform'
+import { graphqlQuery, GET_AFFECTED_RELEASES, GET_SYNCED_ENDPOINTS } from '@/lib/graphql'
+import { GetAffectedReleasesResponse, GetSyncedEndpointsResponse, ImageData, SyncedEndpoint } from '@/lib/types'
+import { transformAffectedReleasesToImageData, transformSyncedEndpointsToCards, getRelativeTime } from '@/lib/dataTransform'
 
 interface SearchResultsProps {
   query: string
@@ -19,8 +19,12 @@ export default function SearchResults({ query }: SearchResultsProps) {
     vulnerabilityScore: [] as string[],
     openssfScore: [] as string[],
     name: '',
+    status: [] as string[],
+    environment: [] as string[],
+    endpointType: [] as string[],
   })
   const [results, setResults] = useState<ImageData[]>([])
+  const [endpointResults, setEndpointResults] = useState<SyncedEndpoint[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
@@ -29,7 +33,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
   const [itemsPerPage, setItemsPerPage] = useState(12)
 
   const categories = [
-    { id: 'image', label: 'Synced Endpoints (Where It\'s Running) ' },
+    { id: 'image', label: 'Synced Endpoints (Where It\'s Running)' },
     { id: 'all', label: 'Project Releases (Where to Fix It)' },
     { id: 'plugin', label: 'Vulnerabilities (The Threat)' },
   ]
@@ -41,23 +45,32 @@ export default function SearchResults({ query }: SearchResultsProps) {
         setLoading(true)
         setError(null)
 
-        // Fetch affected releases with MEDIUM severity or higher
-        // This will give us releases with vulnerabilities
-        const response = await graphqlQuery<GetAffectedReleasesResponse>(
-          GET_AFFECTED_RELEASES,
-          {
-            severity: 'NONE',
-            limit: 1000,
-          }
-        )
+        // Fetch both releases and endpoints in parallel
+        const [releasesResponse, endpointsResponse] = await Promise.all([
+          graphqlQuery<GetAffectedReleasesResponse>(
+            GET_AFFECTED_RELEASES,
+            {
+              severity: 'NONE',
+              limit: 1000,
+            }
+          ),
+          graphqlQuery<GetSyncedEndpointsResponse>(
+            GET_SYNCED_ENDPOINTS,
+            {
+              limit: 1000,
+            }
+          )
+        ])
 
-        // Transform the data to ImageData format
-        const imageData = transformAffectedReleasesToImageData(response.affectedReleases)
+        // Transform the data
+        const imageData = transformAffectedReleasesToImageData(releasesResponse.affectedReleases)
         setResults(imageData)
+        setEndpointResults(endpointsResponse.syncedEndpoints)
       } catch (err) {
         console.error('Error fetching data:', err)
         setError(err instanceof Error ? err.message : 'Failed to fetch data')
         setResults([])
+        setEndpointResults([])
       } finally {
         setLoading(false)
       }
@@ -66,63 +79,127 @@ export default function SearchResults({ query }: SearchResultsProps) {
     fetchData()
   }, [])
 
-  // Reset to page 1 when filters or query changes
+  // Reset to page 1 when filters, query, or category changes
   useEffect(() => {
     setCurrentPage(1)
-  }, [query, filters])
+  }, [query, filters, selectedCategory])
 
   // Filter results based on search query and filters
-  const filteredResults = results.filter(result => {
-    // Search query filter
-    if (query && !result.name.toLowerCase().includes(query.toLowerCase()) &&
-        !result.description.toLowerCase().includes(query.toLowerCase())) {
-      return false
-    }
+  const getFilteredData = () => {
+    // For endpoint category, filter endpoint data
+    if (selectedCategory === 'image') {
+      return endpointResults.filter(endpoint => {
+        // Search query filter
+        if (query && !endpoint.endpoint_name.toLowerCase().includes(query.toLowerCase()) &&
+            !endpoint.endpoint_url.toLowerCase().includes(query.toLowerCase())) {
+          return false
+        }
 
-    // Name filter
-    if (filters.name && !result.name.toLowerCase().includes(filters.name.toLowerCase())) {
-      return false
-    }
+        // Name filter
+        if (filters.name && !endpoint.endpoint_name.toLowerCase().includes(filters.name.toLowerCase())) {
+          return false
+        }
 
-    // Vulnerability Score filters
-    if (filters.vulnerabilityScore.length > 0) {
-      const hasNoVulnerabilities = result.vulnerabilities.critical === 0 && 
-                                   result.vulnerabilities.high === 0 && 
-                                   result.vulnerabilities.medium === 0 && 
-                                   result.vulnerabilities.low === 0
+        // Status filter
+        if (filters.status && filters.status.length > 0) {
+          if (!filters.status.some(s => endpoint.status.toLowerCase() === s.toLowerCase())) {
+            return false
+          }
+        }
 
-      const matchesFilter = filters.vulnerabilityScore.some(filter => {
-        if (filter === 'clean') return hasNoVulnerabilities
-        if (filter === 'critical') return result.vulnerabilities.critical > 0
-        if (filter === 'high') return result.vulnerabilities.high > 0
-        if (filter === 'medium') return result.vulnerabilities.medium > 0
-        if (filter === 'low') return result.vulnerabilities.low > 0
-        return false
+        // Environment filter
+        if (filters.environment && filters.environment.length > 0) {
+          if (!filters.environment.some(e => endpoint.environment.toLowerCase() === e.toLowerCase())) {
+            return false
+          }
+        }
+
+        // Endpoint Type filter
+        if (filters.endpointType && filters.endpointType.length > 0) {
+          if (!filters.endpointType.some(t => endpoint.endpoint_type.toLowerCase() === t.toLowerCase())) {
+            return false
+          }
+        }
+
+        // Vulnerability Score filters
+        if (filters.vulnerabilityScore.length > 0) {
+          const hasNoVulnerabilities = endpoint.total_vulnerabilities.critical === 0 && 
+                                       endpoint.total_vulnerabilities.high === 0 && 
+                                       endpoint.total_vulnerabilities.medium === 0 && 
+                                       endpoint.total_vulnerabilities.low === 0
+
+          const matchesFilter = filters.vulnerabilityScore.some(filter => {
+            if (filter === 'clean') return hasNoVulnerabilities
+            if (filter === 'critical') return endpoint.total_vulnerabilities.critical > 0
+            if (filter === 'high') return endpoint.total_vulnerabilities.high > 0
+            if (filter === 'medium') return endpoint.total_vulnerabilities.medium > 0
+            if (filter === 'low') return endpoint.total_vulnerabilities.low > 0
+            return false
+          })
+
+          if (!matchesFilter) return false
+        }
+
+        return true
       })
-
-      if (!matchesFilter) return false
     }
 
-    // OpenSSF Score filters
-    if (filters.openssfScore.length > 0) {
-      const matchesFilter = filters.openssfScore.some(filter => {
-        if (filter === 'high') return result.openssfScore >= 8.0
-        if (filter === 'medium') return result.openssfScore >= 6.0 && result.openssfScore < 8.0
-        if (filter === 'low') return result.openssfScore < 6.0
+    // For release and vulnerability categories, filter release data
+    return results.filter(result => {
+      // Search query filter
+      if (query && !result.name.toLowerCase().includes(query.toLowerCase()) &&
+          !result.description.toLowerCase().includes(query.toLowerCase())) {
         return false
-      })
+      }
 
-      if (!matchesFilter) return false
-    }
+      // Name filter
+      if (filters.name && !result.name.toLowerCase().includes(filters.name.toLowerCase())) {
+        return false
+      }
 
-    return true
-  })
+      // Vulnerability Score filters
+      if (filters.vulnerabilityScore.length > 0) {
+        const hasNoVulnerabilities = result.vulnerabilities.critical === 0 && 
+                                     result.vulnerabilities.high === 0 && 
+                                     result.vulnerabilities.medium === 0 && 
+                                     result.vulnerabilities.low === 0
+
+        const matchesFilter = filters.vulnerabilityScore.some(filter => {
+          if (filter === 'clean') return hasNoVulnerabilities
+          if (filter === 'critical') return result.vulnerabilities.critical > 0
+          if (filter === 'high') return result.vulnerabilities.high > 0
+          if (filter === 'medium') return result.vulnerabilities.medium > 0
+          if (filter === 'low') return result.vulnerabilities.low > 0
+          return false
+        })
+
+        if (!matchesFilter) return false
+      }
+
+      // OpenSSF Score filters
+      if (filters.openssfScore.length > 0) {
+        const matchesFilter = filters.openssfScore.some(filter => {
+          if (filter === 'high') return result.openssfScore >= 8.0
+          if (filter === 'medium') return result.openssfScore >= 6.0 && result.openssfScore < 8.0
+          if (filter === 'low') return result.openssfScore < 6.0
+          return false
+        })
+
+        if (!matchesFilter) return false
+      }
+
+      return true
+    })
+  }
+
+  const filteredData = getFilteredData()
+  const isEndpointCategory = selectedCategory === 'image'
 
   // Calculate pagination
-  const totalPages = Math.ceil(filteredResults.length / itemsPerPage)
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const paginatedResults = filteredResults.slice(startIndex, endIndex)
+  const paginatedData = filteredData.slice(startIndex, endIndex)
 
   // Generate page numbers to display
   const getPageNumbers = () => {
@@ -161,14 +238,33 @@ export default function SearchResults({ query }: SearchResultsProps) {
     return pages
   }
 
-  const handleCardClick = (imageName: string, version: string) => {
-    router.push(`/image/${imageName}?version=${encodeURIComponent(version)}`)
+  const handleCardClick = (item: any) => {
+    if (selectedCategory === 'image') {
+      // Navigate to endpoint detail page
+      const endpoint = item as SyncedEndpoint
+      router.push(`/endpoint/${endpoint.endpoint_name}`)
+    } else if (selectedCategory === 'all') {
+      // Navigate to release detail page
+      const release = item as ImageData
+      router.push(`/release/${release.name}?version=${encodeURIComponent(release.version)}`)
+    } else if (selectedCategory === 'plugin') {
+      // Navigate to vulnerability detail page
+      const release = item as ImageData
+      router.push(`/vulnerability/${release.name}?version=${encodeURIComponent(release.version)}`)
+    }
   }
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
     // Scroll to top of results
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const getCategoryTitle = () => {
+    if (selectedCategory === 'image') return 'Synced Endpoints'
+    if (selectedCategory === 'all') return 'Project Releases'
+    if (selectedCategory === 'plugin') return 'Vulnerabilities'
+    return 'Results'
   }
 
   if (loading) {
@@ -196,11 +292,11 @@ export default function SearchResults({ query }: SearchResultsProps) {
 
         <div className="px-6 py-6">
           <div className="flex gap-6">
-            <FilterSidebar filters={filters} setFilters={setFilters} />
+            <FilterSidebar filters={filters} setFilters={setFilters} selectedCategory={selectedCategory} />
             <div className="flex-1 flex items-center justify-center py-12">
               <div className="text-center">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="mt-4 text-gray-600">Loading releases...</p>
+                <p className="mt-4 text-gray-600">Loading results...</p>
               </div>
             </div>
           </div>
@@ -234,7 +330,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
 
         <div className="px-6 py-6">
           <div className="flex gap-6">
-            <FilterSidebar filters={filters} setFilters={setFilters} />
+            <FilterSidebar filters={filters} setFilters={setFilters} selectedCategory={selectedCategory} />
             <div className="flex-1 flex items-center justify-center py-12">
               <div className="text-center">
                 <svg className="mx-auto h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -280,18 +376,18 @@ export default function SearchResults({ query }: SearchResultsProps) {
 
       <div className="px-6 py-6">
         <div className="flex gap-6">
-          <FilterSidebar filters={filters} setFilters={setFilters} />
+          <FilterSidebar filters={filters} setFilters={setFilters} selectedCategory={selectedCategory} />
 
           <div className="flex-1">
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-semibold text-gray-900">
-                  {query ? `Search results for "${query}"` : 'Project Releases'}
+                  {query ? `Search results for "${query}"` : getCategoryTitle()}
                 </h2>
                 <p className="text-sm text-gray-600 mt-1">
-                  {filteredResults.length.toLocaleString()} results
-                  {filteredResults.length > itemsPerPage && (
-                    <span className="text-gray-400"> • Showing {startIndex + 1}-{Math.min(endIndex, filteredResults.length)}</span>
+                  {filteredData.length.toLocaleString()} results
+                  {filteredData.length > itemsPerPage && (
+                    <span className="text-gray-400"> • Showing {startIndex + 1}-{Math.min(endIndex, filteredData.length)}</span>
                   )}
                 </p>
               </div>
@@ -318,21 +414,108 @@ export default function SearchResults({ query }: SearchResultsProps) {
               </div>
             </div>
 
-            {filteredResults.length === 0 ? (
+            {filteredData.length === 0 ? (
               <div className="text-center py-12">
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No releases found</h3>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No results found</h3>
                 <p className="mt-1 text-sm text-gray-500">Try adjusting your search or filters</p>
               </div>
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {paginatedResults.map((result, index) => (
+                  {isEndpointCategory ? (
+                    // Render endpoint cards
+                    (paginatedData as SyncedEndpoint[]).map((endpoint, index) => (
+                      <div
+                        key={index}
+                        onClick={() => handleCardClick(endpoint)}
+                        className="border border-gray-200 rounded-lg p-4 hover:border-gray-400 hover:shadow-md transition-all cursor-pointer bg-white flex flex-col h-full"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex flex-col flex-1">
+                            <h3 className="text-base font-semibold text-blue-600 hover:underline break-words">
+                              {endpoint.endpoint_name}
+                            </h3>
+                            <p className="text-xs text-gray-500 mt-1">{endpoint.endpoint_url}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 mb-2">
+                          <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          <span className="text-xs font-medium text-gray-700">Vulnerabilities:</span>
+                          {endpoint.total_vulnerabilities.critical === 0 && 
+                           endpoint.total_vulnerabilities.high === 0 && 
+                           endpoint.total_vulnerabilities.medium === 0 && 
+                           endpoint.total_vulnerabilities.low === 0 ? (
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-green-100 rounded text-xs">
+                              <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                              <span className="font-semibold text-green-800">Clean</span>
+                            </div>
+                          ) : (
+                            <>
+                              {endpoint.total_vulnerabilities.critical > 0 && (
+                                <div className="flex items-center gap-1 px-2 py-0.5 bg-red-100 rounded text-xs">
+                                  <div className="w-2 h-2 rounded-full bg-red-600"></div>
+                                  <span className="font-semibold text-red-800">{endpoint.total_vulnerabilities.critical} C</span>
+                                </div>
+                              )}
+                              {endpoint.total_vulnerabilities.high > 0 && (
+                                <div className="flex items-center gap-1 px-2 py-0.5 bg-orange-100 rounded text-xs">
+                                  <div className="w-2 h-2 rounded-full bg-orange-600"></div>
+                                  <span className="font-semibold text-orange-800">{endpoint.total_vulnerabilities.high} H</span>
+                                </div>
+                              )}
+                              {endpoint.total_vulnerabilities.medium > 0 && (
+                                <div className="flex items-center gap-1 px-2 py-0.5 bg-yellow-100 rounded text-xs">
+                                  <div className="w-2 h-2 rounded-full bg-yellow-600"></div>
+                                  <span className="font-semibold text-yellow-800">{endpoint.total_vulnerabilities.medium} M</span>
+                                </div>
+                              )}
+                              {endpoint.total_vulnerabilities.low > 0 && (
+                                <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-100 rounded text-xs">
+                                  <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                                  <span className="font-semibold text-blue-800">{endpoint.total_vulnerabilities.low} L</span>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-4 text-xs text-gray-600 pt-2 border-t border-gray-100">
+                          <div className="flex items-center gap-1">
+                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            <span className="font-medium">{endpoint.release_count} releases</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                              endpoint.status.toLowerCase() === 'active' ? 'bg-green-100 text-green-800' :
+                              endpoint.status.toLowerCase() === 'inactive' ? 'bg-gray-100 text-gray-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {endpoint.status}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="text-xs text-gray-500 mt-2">
+                          Synced {getRelativeTime(endpoint.last_sync)}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    // Render release/vulnerability cards
+                    (paginatedData as ImageData[]).map((result, index) => (
                     <div
                       key={index}
-                      onClick={() => handleCardClick(result.name, result.version)}
+                      onClick={() => handleCardClick(result)}
                       className="border border-gray-200 rounded-lg p-4 hover:border-gray-400 hover:shadow-md transition-all cursor-pointer bg-white flex flex-col h-full"
                     >
                       <div className="flex items-start justify-between mb-2">
