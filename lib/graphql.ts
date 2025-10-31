@@ -59,6 +59,7 @@ export const GET_AFFECTED_RELEASES = `
       content_sha
       project_type
       dependency_count
+      openssf_scorecard_score
     }
   }
 `

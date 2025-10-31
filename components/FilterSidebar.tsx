@@ -2,14 +2,15 @@
 
 interface FilterSidebarProps {
   filters: {
-    imageType: string[]
-    operatingSystem: string[]
+    vulnerabilityScore: string[]
+    openssfScore: string[]
+    name: string
   }
   setFilters: (filters: any) => void
 }
 
 export default function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
-  const handleCheckboxChange = (category: 'imageType' | 'operatingSystem', value: string) => {
+  const handleCheckboxChange = (category: 'vulnerabilityScore' | 'openssfScore', value: string) => {
     setFilters((prev: any) => {
       const currentValues = prev[category]
       const newValues = currentValues.includes(value)
@@ -23,14 +24,22 @@ export default function FilterSidebar({ filters, setFilters }: FilterSidebarProp
     })
   }
 
+  const handleNameChange = (value: string) => {
+    setFilters((prev: any) => ({
+      ...prev,
+      name: value,
+    }))
+  }
+
   const clearFilters = () => {
     setFilters({
-      imageType: [],
-      operatingSystem: [],
+      vulnerabilityScore: [],
+      openssfScore: [],
+      name: '',
     })
   }
 
-  const hasActiveFilters = filters.imageType.length > 0 || filters.operatingSystem.length > 0
+  const hasActiveFilters = filters.vulnerabilityScore.length > 0 || filters.openssfScore.length > 0 || filters.name !== ''
 
   return (
     <aside className="w-64 flex-shrink-0">
@@ -48,76 +57,96 @@ export default function FilterSidebar({ filters, setFilters }: FilterSidebarProp
         </div>
 
         <div className="mb-6">
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">Image Type</h4>
-          <div className="space-y-2">
-            <label className="flex items-center cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={filters.imageType.includes('official')}
-                onChange={() => handleCheckboxChange('imageType', 'official')}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Official Images</span>
-            </label>
-            <label className="flex items-center cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={filters.imageType.includes('verified')}
-                onChange={() => handleCheckboxChange('imageType', 'verified')}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Verified Publisher</span>
-            </label>
-          </div>
+          <h4 className="text-sm font-semibold text-gray-900 mb-3">Name</h4>
+          <input
+            type="text"
+            value={filters.name}
+            onChange={(e) => handleNameChange(e.target.value)}
+            placeholder="Filter by name..."
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
 
         <div className="mb-6">
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">Operating System</h4>
+          <h4 className="text-sm font-semibold text-gray-900 mb-3">Vulnerability Score</h4>
           <div className="space-y-2">
             <label className="flex items-center cursor-pointer group">
               <input
                 type="checkbox"
-                checked={filters.operatingSystem.includes('linux')}
-                onChange={() => handleCheckboxChange('operatingSystem', 'linux')}
+                checked={filters.vulnerabilityScore.includes('critical')}
+                onChange={() => handleCheckboxChange('vulnerabilityScore', 'critical')}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Linux</span>
+              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Critical</span>
             </label>
             <label className="flex items-center cursor-pointer group">
               <input
                 type="checkbox"
-                checked={filters.operatingSystem.includes('windows')}
-                onChange={() => handleCheckboxChange('operatingSystem', 'windows')}
+                checked={filters.vulnerabilityScore.includes('high')}
+                onChange={() => handleCheckboxChange('vulnerabilityScore', 'high')}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Windows</span>
+              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">High</span>
+            </label>
+            <label className="flex items-center cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={filters.vulnerabilityScore.includes('medium')}
+                onChange={() => handleCheckboxChange('vulnerabilityScore', 'medium')}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Medium</span>
+            </label>
+            <label className="flex items-center cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={filters.vulnerabilityScore.includes('low')}
+                onChange={() => handleCheckboxChange('vulnerabilityScore', 'low')}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Low</span>
+            </label>
+            <label className="flex items-center cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={filters.vulnerabilityScore.includes('clean')}
+                onChange={() => handleCheckboxChange('vulnerabilityScore', 'clean')}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Clean</span>
             </label>
           </div>
         </div>
 
         <div>
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">Architectures</h4>
+          <h4 className="text-sm font-semibold text-gray-900 mb-3">OpenSSF Score</h4>
           <div className="space-y-2">
             <label className="flex items-center cursor-pointer group">
               <input
                 type="checkbox"
+                checked={filters.openssfScore.includes('high')}
+                onChange={() => handleCheckboxChange('openssfScore', 'high')}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">ARM 64</span>
+              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">High (8.0+)</span>
             </label>
             <label className="flex items-center cursor-pointer group">
               <input
                 type="checkbox"
+                checked={filters.openssfScore.includes('medium')}
+                onChange={() => handleCheckboxChange('openssfScore', 'medium')}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">AMD64</span>
+              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Medium (6.0-7.9)</span>
             </label>
             <label className="flex items-center cursor-pointer group">
               <input
                 type="checkbox"
+                checked={filters.openssfScore.includes('low')}
+                onChange={() => handleCheckboxChange('openssfScore', 'low')}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">ARM</span>
+              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Low (&lt;6.0)</span>
             </label>
           </div>
         </div>
