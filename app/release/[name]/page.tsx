@@ -4,6 +4,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 import Header from '@/components/Header'
+import SyncedEndpoints from '@/components/SyncedEndpoints'
 import { graphqlQuery, GET_RELEASE } from '@/lib/graphql'
 import { GetReleaseResponse, Release } from '@/lib/types'
 import { countVulnerabilitiesBySeverity, getRelativeTime, extractTags, estimatePullCount } from '@/lib/dataTransform'
@@ -16,6 +17,7 @@ export default function ImageDetailPage() {
   const [release, setRelease] = useState<Release | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isEndpointsModalOpen, setIsEndpointsModalOpen] = useState(false)
 
   const imageName = params.name as string
   const version = searchParams.get('version') || 'latest'
@@ -109,6 +111,13 @@ export default function ImageDetailPage() {
     <div className="min-h-screen bg-white">
       <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} />
 
+      <SyncedEndpoints
+        isOpen={isEndpointsModalOpen}
+        onClose={() => setIsEndpointsModalOpen(false)}
+        releaseName={release.name}
+        releaseVersion={release.version}
+      />
+
       <div className="container mx-auto px-6 py-6 max-w-7xl">
         <button
           onClick={() => router.back()}
@@ -141,9 +150,17 @@ export default function ImageDetailPage() {
               <p className="text-sm text-gray-500">Updated {updated}</p>
             </div>
 
-            <button className="px-6 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors">
-              Docker Pull Command
-            </button>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setIsEndpointsModalOpen(true)}
+                className="px-6 py-3 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors"
+              >
+                View Synced Endpoints
+              </button>
+              <button className="px-6 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors">
+                Docker Pull Command
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center gap-8 mb-8 pb-8 border-b border-gray-200">

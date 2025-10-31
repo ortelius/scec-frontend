@@ -36,6 +36,35 @@ export interface AffectedRelease {
   openssf_scorecard_score: number
 }
 
+export interface AffectedEndpoint {
+  endpoint_name: string
+  endpoint_url: string
+  endpoint_type: string
+  environment: string
+  last_sync: string
+  status: string
+}
+
+export interface SyncedEndpoint {
+  endpoint_name: string
+  endpoint_url: string
+  endpoint_type: string
+  environment: string
+  status: string
+  last_sync: string
+  release_count: number
+  total_vulnerabilities: {
+    critical: number
+    high: number
+    medium: number
+    low: number
+  }
+  releases: Array<{
+    release_name: string
+    release_version: string
+  }>
+}
+
 export interface SBOM {
   key: string
   contentsha: string
@@ -88,4 +117,12 @@ export interface GetAffectedReleasesResponse {
 
 export interface GetReleaseResponse {
   release: Release
+}
+
+export interface GetAffectedEndpointsResponse {
+  affectedEndpoints: AffectedEndpoint[]
+}
+
+export interface GetSyncedEndpointsResponse {
+  syncedEndpoints: SyncedEndpoint[]
 }
