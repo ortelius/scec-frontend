@@ -33,6 +33,7 @@ export interface AffectedRelease {
   project_type: string
   dependency_count: number
   synced_endpoint_count: number
+  openssf_scorecard_score: number
 }
 
 export interface SBOM {

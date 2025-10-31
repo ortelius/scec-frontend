@@ -1,6 +1,6 @@
 'use client'
 
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 import Header from '@/components/Header'
@@ -11,12 +11,14 @@ import { countVulnerabilitiesBySeverity, getRelativeTime, extractTags, estimateP
 export default function ImageDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [release, setRelease] = useState<Release | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const imageName = params.name as string
+  const version = searchParams.get('version') || 'latest'
 
   const handleSearch = () => {
     router.push('/')
@@ -35,7 +37,7 @@ export default function ImageDetailPage() {
           GET_RELEASE,
           {
             name: imageName,
-            version: 'latest', // You might want to make this dynamic
+            version: version,
           }
         )
 
@@ -51,7 +53,7 @@ export default function ImageDetailPage() {
     if (imageName) {
       fetchRelease()
     }
-  }, [imageName])
+  }, [imageName, version])
 
   if (loading) {
     return (
@@ -225,7 +227,29 @@ export default function ImageDetailPage() {
               </div>
 
               <div className="space-y-4">
-                {release.vulnerabilities.slice(0, 10).map((vuln, index) => (
+                {release.vulnerabilities
+                  .sort((a, b) => {
+                    // Define severity order
+                    const severityOrder: { [key: string]: number } = {
+                      'critical': 0,
+                      'high': 1,
+                      'medium': 2,
+                      'low': 3,
+                      'unknown': 4
+                    }
+                    
+                    const aSeverity = (a.severity_rating?.toLowerCase() || 'unknown')
+                    const bSeverity = (b.severity_rating?.toLowerCase() || 'unknown')
+                    
+                    // Sort by severity first
+                    const severityDiff = severityOrder[aSeverity] - severityOrder[bSeverity]
+                    if (severityDiff !== 0) return severityDiff
+                    
+                    // If same severity, sort by score (descending)
+                    return (b.severity_score || 0) - (a.severity_score || 0)
+                  })
+                  .slice(0, 10)
+                  .map((vuln, index) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">

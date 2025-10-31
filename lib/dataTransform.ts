@@ -20,30 +20,6 @@ export function countVulnerabilitiesBySeverity(vulnerabilities: Vulnerability[])
   return counts
 }
 
-// Helper to calculate OpenSSF score based on vulnerabilities and other factors
-export function calculateOpenssfScore(
-  vulnerabilities: { critical: number; high: number; medium: number; low: number },
-  signed: boolean,
-  verified: boolean
-): number {
-  let score = 10.0
-
-  // Deduct points for vulnerabilities
-  score -= vulnerabilities.critical * 0.8
-  score -= vulnerabilities.high * 0.4
-  score -= vulnerabilities.medium * 0.2
-  score -= vulnerabilities.low * 0.05
-
-  // Deduct if not signed
-  if (!signed) score -= 0.5
-
-  // Deduct if not verified
-  if (!verified) score -= 0.3
-
-  // Ensure score stays within 0-10 range
-  return Math.max(0, Math.min(10, score))
-}
-
 // Helper to format relative time
 export function getRelativeTime(dateString: string): string {
   try {
@@ -100,22 +76,6 @@ export function transformAffectedReleasesToImageData(
       else if (rating === 'low') vulnCounts.low++
     })
 
-    // Extract unique packages (dependencies count)
-    const uniquePackages = new Set(releases.map(r => r.package))
-    const packageCount = uniquePackages.size
-
-    // Use dependency_count from the first release (should be same for all)
-    const dependencyCount = firstRelease.dependency_count || packageCount
-
-    // Determine if official/verified (simplified logic)
-    const isOfficial = firstRelease.project_type === 'docker' ||
-                       firstRelease.release_name.toLowerCase().includes('official')
-    const isVerified = vulnCounts.critical === 0 && vulnCounts.high < 3
-    const isSigned = firstRelease.content_sha !== ''
-
-    // Calculate OpenSSF score
-    const openssfScore = calculateOpenssfScore(vulnCounts, isSigned, isVerified)
-
     // Get the most recent modified date
     const mostRecentDate = releases.reduce((latest, r) => {
       const date = new Date(r.modified)
@@ -127,17 +87,17 @@ export function transformAffectedReleasesToImageData(
       version: firstRelease.release_version,
       releaseDate: firstRelease.published || new Date().toISOString(),
       publisher: firstRelease.project_type === 'docker' ? 'Docker Official Image' : 'Community',
-      description: `${firstRelease.project_type} release with ${dependencyCount} dependencies`,
-      pulls: dependencyCount > 100 ? '1B+' : dependencyCount > 50 ? '500M+' : '100M+',
+      description: `${firstRelease.project_type} release with ${firstRelease.dependency_count} dependencies`,
+      pulls: firstRelease.dependency_count > 100 ? '1B+' : firstRelease.dependency_count > 50 ? '500M+' : '100M+',
       updated: getRelativeTime(mostRecentDate.toISOString()),
-      verified: isVerified,
-      official: isOfficial,
+      verified: false,
+      official: false,
       tags: ['latest', firstRelease.release_version, firstRelease.project_type],
       longDescription: `${firstRelease.release_name} version ${firstRelease.release_version}`,
       vulnerabilities: vulnCounts,
-      dependency_count: dependencyCount,
-      signed: isSigned,
-      openssfScore,
+      dependency_count: firstRelease.dependency_count,
+      signed: false,
+      openssfScore: firstRelease.openssf_scorecard_score,
       syncedEndpoints: firstRelease.synced_endpoint_count || 0,
     })
   })
