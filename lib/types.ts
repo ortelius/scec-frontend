@@ -86,7 +86,6 @@ export interface Release {
   vulnerabilities: Vulnerability[]
 }
 
-// For display purposes, we'll transform the GraphQL data into this format
 export interface ImageData {
   name: string
   version: string
@@ -125,4 +124,21 @@ export interface GetAffectedEndpointsResponse {
 
 export interface GetSyncedEndpointsResponse {
   syncedEndpoints: SyncedEndpoint[]
+}
+
+export interface Mitigation {
+  cve_id: string
+  summary: string
+  severity_score: number
+  severity_rating: string
+  package: string
+  affected_version: string
+  full_purl: string
+  fixed_in: string[]
+  affected_releases: number
+  affected_endpoints: number
+}
+
+export interface GetMitigationsResponse {
+  mitigations: Mitigation[]
 }
