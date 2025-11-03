@@ -202,8 +202,8 @@ export default function FilterSidebar({ filters, setFilters, selectedCategory }:
           </>
         )}
 
-        {/* Project Releases and Vulnerabilities filters */}
-        {(selectedCategory === 'all' || selectedCategory === 'plugin') && (
+        {/* Project Releases, Vulnerabilities, and Mitigations filters */}
+        {(selectedCategory === 'all' || selectedCategory === 'plugin' || selectedCategory === 'mitigations') && (
           <>
             <div className="mb-6">
               <h4 className="text-sm font-semibold text-gray-900 mb-3">Vulnerability Score</h4>
@@ -276,7 +276,10 @@ export default function FilterSidebar({ filters, setFilters, selectedCategory }:
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                   <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">Medium (6.0-7.9)</span>
-                </label>
+                </label> 
+                {/* --- THIS WAS THE ERROR ---
+                </entry>
+                --- THIS IS THE FIX --- */}
                 <label className="flex items-center cursor-pointer group">
                   <input
                     type="checkbox"
