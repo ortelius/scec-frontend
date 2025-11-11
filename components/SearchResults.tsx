@@ -837,9 +837,15 @@ export default function SearchResults({ query }: SearchResultsProps) {
                           </div>
                           <div className="flex items-center gap-1">
                             <span className="font-medium">OpenSSF:</span>
-                            <span className={`font-bold ${ result.openssfScore >= 8 ? 'text-green-600' : result.openssfScore >= 6 ? 'text-yellow-600' : 'text-red-600' }`}>
-                              {result.openssfScore.toFixed(1)}
-                            </span>
+                              <span className={`font-bold ${ 
+                                result.openssfScore != null 
+                                  ? result.openssfScore >= 8 ? 'text-green-600' 
+                                    : result.openssfScore >= 6 ? 'text-yellow-600' 
+                                    : 'text-red-600'
+                                  : 'text-gray-400'
+                              }`}>
+                                {result.openssfScore != null ? result.openssfScore.toFixed(1) : 'N/A'}
+                              </span>
                           </div>
                         </div>
                         <div className="text-xs text-gray-500 mt-2">Updated {result.updated}</div>
