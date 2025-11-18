@@ -13,7 +13,7 @@ import {
   estimatePullCount,
 } from '@/lib/dataTransform'
 
-export default function ImageDetailPage() {
+export default function ReleaseVersionDetailPage() {
   const params = useParams()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -24,17 +24,17 @@ export default function ImageDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [isEndpointsModalOpen, setIsEndpointsModalOpen] = useState(false)
 
-  const imageName = params.name as string
+  const releaseVersion = params.name as string
   const version = searchParams.get('version') || 'latest'
 
   const handleSearch = () => router.push('/')
 
   const [vulnerabilities, setVulnerabilities] = useState<Release['vulnerabilities']>([])
-  const [packages, setPackages] = useState<Array<{ name: string; version: string }>>([])
+  const [packages, setPackages] = useState<Array<{ name: string; version: string; purl?: string }>>([])
 
   // Filter state
-  const [selectedSeverities, setSelectedSeverities] = useState<string[]>(['critical', 'high', 'medium', 'low'])
-  const [selectedPackages, setSelectedPackages] = useState<string[]>([])
+  const [selectedSeverities, setSelectedSeverities] = useState<string[]>(['critical', 'high', 'medium', 'low', 'clean'])
+  const [packageFilter, setPackageFilter] = useState<string>('')
   const [searchCVE, setSearchCVE] = useState('')
 
   useEffect(() => {
@@ -43,19 +43,40 @@ export default function ImageDetailPage() {
         setLoading(true)
         setError(null)
 
-        const response = await graphqlQuery<GetReleaseResponse>(GET_RELEASE, { name: imageName, version })
+        const response = await graphqlQuery<GetReleaseResponse>(GET_RELEASE, { name: releaseVersion, version })
         const releaseData = response.release
         setRelease(releaseData)
 
         setVulnerabilities(releaseData.vulnerabilities)
 
         // Parse packages from SBOM
-        let pkgData: Array<{ name: string; version: string }> = []
+        let pkgData: Array<{ name: string; version: string; purl?: string }> = []
         try {
           if (releaseData.sbom?.content) {
             const sbomData = JSON.parse(releaseData.sbom.content)
             const components = sbomData.components || []
-            pkgData = components.map((c: any) => ({ name: c.name, version: c.version || 'unknown' }))
+            pkgData = components
+              .filter((c: any) => c.type !== 'file' && c.type !== 'application')
+              .map((c: any) => {
+                let identifier = c.purl
+                if (!identifier && c['bom-ref']) {
+                  identifier = c['bom-ref']
+                }
+
+                // Strip version from PURL if present
+                if (identifier) {
+                  if (identifier.includes('/') && !identifier.startsWith('pkg:')) {
+                    identifier = identifier.split('/').pop() || identifier
+                  }
+                  identifier = identifier.replace(/@[^@]*$/, '')
+                }
+
+                return {
+                  name: identifier || c.name,
+                  version: c.version || 'unknown',
+                  purl: identifier || c.name
+                }
+              })
           }
         } catch (e) {
           console.error('Failed to parse SBOM:', e)
@@ -69,8 +90,8 @@ export default function ImageDetailPage() {
       }
     }
 
-    if (imageName) fetchRelease()
-  }, [imageName, version])
+    if (releaseVersion) fetchRelease()
+  }, [releaseVersion, version])
 
   if (loading) return (
     <div className="min-h-screen bg-white">
@@ -108,20 +129,70 @@ export default function ImageDetailPage() {
   const openssfScore = release.openssf_score || 'N/A'
   const syncedEndpoints = release.synced_endpoints?.length || 0
 
-  // Filtered vulnerabilities
-  const filteredVulnerabilities = vulnerabilities
-    .filter(v => selectedSeverities.includes(v.severity_rating?.toLowerCase() || 'unknown'))
-    .filter(v => selectedPackages.length === 0 || selectedPackages.includes(v.package))
-    .filter(v => !searchCVE || v.cve_id.includes(searchCVE))
-    .sort((a, b) => {
-      const severityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3, unknown: 4 }
-      const aSeverity = severityOrder[a.severity_rating?.toLowerCase() || 'unknown'] ?? 4
-      const bSeverity = severityOrder[b.severity_rating?.toLowerCase() || 'unknown'] ?? 4
-      if (aSeverity !== bSeverity) return aSeverity - bSeverity
-      return a.cve_id.localeCompare(b.cve_id)
-    })
+  const uniquePackages = packages.filter((pkg, index, self) =>
+    index === self.findIndex((p) => p.name === pkg.name && p.version === pkg.version)
+  )
 
-  // Download SBOM
+  const vulnByPackage = vulnerabilities.reduce((acc, v) => {
+    if (!acc[v.package]) acc[v.package] = []
+    acc[v.package].push(v)
+    return acc
+  }, {} as Record<string, typeof vulnerabilities>)
+
+  // Merge packages + vulnerabilities, CLEAN rows always added
+  const allPackageNames = Array.from(new Set([...uniquePackages.map(p => p.name), ...vulnerabilities.map(v => v.package)]))
+
+  const combinedData = allPackageNames.flatMap(pkgName => {
+    const pkg = uniquePackages.find(p => p.name === pkgName)
+    const vulns = vulnByPackage[pkgName] || []
+
+    // Filter by free text package search
+    if (packageFilter && !pkgName.toLowerCase().includes(packageFilter.toLowerCase())) return []
+
+    const filteredVulns = vulns
+      .filter(v => selectedSeverities.includes(v.severity_rating?.toLowerCase() || 'unknown'))
+      .filter(v => !searchCVE || v.cve_id.includes(searchCVE))
+
+    if (filteredVulns.length > 0) {
+      return filteredVulns.map(v => ({
+        cve_id: v.cve_id,
+        severity: v.severity_rating?.toLowerCase() || 'unknown',
+        score: v.severity_score || 0,
+        package: pkgName,
+        version: v.affected_version || pkg?.version || 'unknown',
+        fixed_in: v.fixed_in?.join(', ') || '—'
+      }))
+    }
+
+    // CLEAN row (only if no vulns exist for that package)
+    if (selectedSeverities.includes('clean')) {
+      return [{
+        cve_id: '—',
+        severity: 'clean',
+        score: 0,
+        package: pkgName,
+        version: pkg?.version || 'unknown',
+        fixed_in: '—'
+      }]
+    }
+
+    return []
+  })
+
+  // Default sort: by score descending, then package name
+  combinedData.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score
+    return a.package.localeCompare(b.package)
+  })
+
+  const stripVersionFromPurl = (purl: string | undefined, packageName: string): string => {
+    if (!purl) return packageName
+    if (purl.includes('/') && !purl.startsWith('pkg:')) {
+      return purl.split('/').pop() || purl
+    }
+    return purl.replace(/@[^@]*$/, '')
+  }
+
   const downloadSBOM = () => {
     if (!release.sbom?.content) return
     const blob = new Blob([release.sbom.content], { type: 'application/json' })
@@ -138,142 +209,160 @@ export default function ImageDetailPage() {
       <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} />
       <SyncedEndpoints isOpen={isEndpointsModalOpen} onClose={() => setIsEndpointsModalOpen(false)} releaseName={release.name} releaseVersion={release.version} />
 
-      <div className="w-full max-w-[1400px] mx-auto py-6 flex gap-6 px-4">
-        {/* Sidebar */}
-        <aside className="w-full lg:w-64 flex-shrink-0 space-y-4 sticky top-24 self-start">
-          <div className="bg-gray-50 p-4 rounded-lg border">
-            <h3 className="font-bold mb-2">Filter by Severity</h3>
-            {['critical', 'high', 'medium', 'low'].map(level => (
-              <label key={level} className="flex items-center gap-2 text-sm">
-                <input type="checkbox"
-                  checked={selectedSeverities.includes(level)}
-                  onChange={() => {
-                    setSelectedSeverities(prev =>
-                      prev.includes(level) ? prev.filter(s => s !== level) : [...prev, level]
-                    )
-                  }} />
-                {level.charAt(0).toUpperCase() + level.slice(1)}
-              </label>
-            ))}
-          </div>
+      <div className="px-6 py-6">
+        <div className="flex gap-6">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 flex-shrink-0">
+            <div className="bg-white border border-gray-200 rounded-lg p-4 sticky top-20">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-900">Filters</h3>
+                {(selectedSeverities.length < 5 || packageFilter) && (
+                  <button
+                    onClick={() => {
+                      setSelectedSeverities(['critical', 'high', 'medium', 'low', 'clean'])
+                      setPackageFilter('')
+                      setSearchCVE('')
+                    }}
+                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
 
-          <div className="bg-gray-50 p-4 rounded-lg border">
-            <h3 className="font-bold mb-2">Filter by Package</h3>
-            <select multiple className="w-full border rounded p-1 text-sm" value={selectedPackages} onChange={e => {
-              const options = Array.from(e.target.selectedOptions).map(o => o.value)
-              setSelectedPackages(options)
-            }}>
-              {packages.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
-            </select>
-          </div>
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Filter by Severity</h4>
+                <div className="space-y-2">
+                  {['critical', 'high', 'medium', 'low', 'clean'].map(level => (
+                    <label key={level} className="flex items-center cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={selectedSeverities.includes(level)}
+                        onChange={() => {
+                          setSelectedSeverities(prev =>
+                            prev.includes(level) ? prev.filter(s => s !== level) : [...prev, level]
+                          )
+                        }}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">
+                        {level.charAt(0).toUpperCase() + level.slice(1)}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
 
-          <div className="bg-gray-50 p-4 rounded-lg border">
-            <h3 className="font-bold mb-2">Search CVE ID</h3>
-            <input type="text" className="w-full border rounded p-1 text-sm" value={searchCVE} onChange={e => setSearchCVE(e.target.value)} placeholder="Search..." />
-          </div>
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Filter by Package</h4>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Search package name..."
+                  value={packageFilter}
+                  onChange={e => setPackageFilter(e.target.value)}
+                />
+              </div>
 
-          {release.sbom?.content && (
-            <button onClick={downloadSBOM} className="mt-2 w-full bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg py-2 text-sm">
-              Download SBOM
-            </button>
-          )}
-        </aside>
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Search CVE ID</h4>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={searchCVE}
+                  onChange={e => setSearchCVE(e.target.value)}
+                  placeholder="Filter by CVE ID..."
+                />
+              </div>
 
-        {/* Main content */}
-        <main className="flex-1 space-y-6">
-          {/* Summary Card */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4 text-center bg-gray-50 p-4 rounded-lg">
-            <div>
-              <p className="text-sm text-gray-600">OpenSSF Score</p>
-              <p className="font-bold text-lg">{openssfScore}</p>
+              {release.sbom?.content && (
+                <button
+                  onClick={downloadSBOM}
+                  className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Download SBOM
+                </button>
+              )}
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Synced Endpoints</p>
-              <p className="font-bold text-lg">{syncedEndpoints}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Packages</p>
-              <p className="font-bold text-lg">{packages.length}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Pulls</p>
-              <p className="font-bold text-lg">{pulls}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Vulnerabilities</p>
-              <div className="flex justify-center gap-1 mt-1 flex-wrap">
-                {vulnCounts.critical > 0 && <span className="inline-block px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium">{vulnCounts.critical} C</span>}
-                {vulnCounts.high > 0 && <span className="inline-block px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs font-medium">{vulnCounts.high} H</span>}
-                {vulnCounts.medium > 0 && <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-medium">{vulnCounts.medium} M</span>}
-                {vulnCounts.low > 0 && <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">{vulnCounts.low} L</span>}
+          </aside>
+
+          {/* Main content */}
+          <main className="flex-1 space-y-6">
+            {/* Summary Card */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center bg-gray-50 p-4 rounded-lg">
+              <div>
+                <p className="text-sm text-gray-600">Vulnerabilities</p>
+                <div className="flex justify-center gap-1 mt-1 flex-wrap">
+                  {vulnCounts.critical > 0 && <span className="inline-block px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium">{vulnCounts.critical} C</span>}
+                  {vulnCounts.high > 0 && <span className="inline-block px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs font-medium">{vulnCounts.high} H</span>}
+                  {vulnCounts.medium > 0 && <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-medium">{vulnCounts.medium} M</span>}
+                  {vulnCounts.low > 0 && <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">{vulnCounts.low} L</span>}
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">OpenSSF Score</p>
+                <p className="font-bold text-lg">{openssfScore}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Synced Endpoints</p>
+                <p className="font-bold text-lg">{syncedEndpoints}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Packages</p>
+                <p className="font-bold text-lg">{packages.length}</p>
               </div>
             </div>
-          </div>
 
-          {/* Vulnerabilities Table */}
-          {filteredVulnerabilities.length > 0 && (
-            <div className="overflow-auto max-h-[600px] border rounded-lg">
-              <table className="w-full table-auto min-w-[700px]">
-                <thead className="bg-gray-100 sticky top-0 z-10">
-                  <tr>
-                    <th className="px-4 py-2 text-left border-b">CVE ID</th>
-                    <th className="px-4 py-2 text-left border-b">Severity</th>
-                    <th className="px-4 py-2 text-left border-b">Score</th>
-                    <th className="px-4 py-2 text-left border-b">Package</th>
-                    <th className="px-4 py-2 text-left border-b">Affected Version</th>
-                    <th className="px-4 py-2 text-left border-b">Fixed In</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredVulnerabilities.map((vuln, index) => (
-                    <tr key={`${vuln.cve_id}-${vuln.package}-${index}`} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-2">{vuln.cve_id}</td>
-                      <td className="px-4 py-2">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          vuln.severity_rating?.toLowerCase() === 'critical'
-                            ? 'bg-red-100 text-red-800'
-                            : vuln.severity_rating?.toLowerCase() === 'high'
-                            ? 'bg-orange-100 text-orange-800'
-                            : vuln.severity_rating?.toLowerCase() === 'medium'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          {vuln.severity_rating?.toUpperCase() || 'UNKNOWN'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2">{vuln.severity_score?.toFixed(1) || '-'}</td>
-                      <td className="px-4 py-2">{vuln.package}</td>
-                      <td className="px-4 py-2">{vuln.affected_version || '-'}</td>
-                      <td className="px-4 py-2">{vuln.fixed_in?.join(', ') || '-'}</td>
+            {/* Combined Table */}
+            {combinedData.length > 0 && (
+              <div className="overflow-auto max-h-[600px] border rounded-lg">
+                <table className="w-full table-auto min-w-[700px]">
+                  <thead className="bg-gray-100 sticky top-0 z-10">
+                    <tr>
+                      <th className="px-4 py-2 text-left border-b">CVE ID</th>
+                      <th className="px-4 py-2 text-left border-b">Severity</th>
+                      <th className="px-4 py-2 text-left border-b">Score</th>
+                      <th className="px-4 py-2 text-left border-b">Package</th>
+                      <th className="px-4 py-2 text-left border-b">Version</th>
+                      <th className="px-4 py-2 text-left border-b">Fixed In</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  </thead>
+                  <tbody>
+                    {combinedData.map((row, index) => (
+                      <tr key={index} className="border-b hover:bg-gray-50">
+                        <td className="px-4 py-2">{row.cve_id}</td>
+                        <td className="px-4 py-2">
+                          {row.severity === 'clean' ? (
+                            <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+                              CLEAN
+                            </span>
+                          ) : (
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              row.severity === 'critical'
+                                ? 'bg-red-100 text-red-800'
+                                : row.severity === 'high'
+                                ? 'bg-orange-100 text-orange-800'
+                                : row.severity === 'medium'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-blue-100 text-blue-800'
+                            }`}>
+                              {row.severity.toUpperCase()}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2">{row.score}</td>
+                        <td className="px-4 py-2">{row.package}</td>
+                        <td className="px-4 py-2">{row.version}</td>
+                        <td className="px-4 py-2">{row.fixed_in}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
-          {/* Packages Table */}
-          {packages.length > 0 && (
-            <div className="overflow-auto max-h-[600px] border rounded-lg mt-6">
-              <table className="w-full table-auto min-w-[400px]">
-                <thead className="bg-gray-100 sticky top-0 z-10">
-                  <tr>
-                    <th className="px-4 py-2 text-left border-b">Package Name</th>
-                    <th className="px-4 py-2 text-left border-b">Version</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {packages.map((pkg, index) => (
-                    <tr key={`${pkg.name}-${pkg.version}-${index}`} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-2">{pkg.name}</td>
-                      <td className="px-4 py-2">{pkg.version}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   )
