@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react' // Re-added useRef
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 import FilterSidebar from '@/components/FilterSidebar'
@@ -24,7 +24,7 @@ interface SearchResultsProps {
   query: string
 }
 
-// --- MOCK DATA FOR MITIGATIONS (from your page.tsx) ---
+// Mock data for Mitigations
 const mockMitigations: Mitigation[] = [
   {
     cve_id: 'GHSA-f82v-jwr5-mffw',
@@ -63,7 +63,6 @@ const mockMitigations: Mitigation[] = [
     affected_endpoints: 58,
   },
 ]
-// --- END MOCK DATA ---
 
 export default function SearchResults({ query }: SearchResultsProps) {
   const router = useRouter()
@@ -83,19 +82,36 @@ export default function SearchResults({ query }: SearchResultsProps) {
   const [vulnerabilityResults, setVulnerabilityResults] = useState<Mitigation[]>([])
   const [mockMitigationList, setMockMitigationList] = useState<Mitigation[]>([])
 
-  // Loading and Error states
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // Loading and Error states - separate per category
+  const [loadingStates, setLoadingStates] = useState({
+    all: false,
+    image: false,
+    plugin: false,
+    mitigations: false
+  })
+  const [errorStates, setErrorStates] = useState({
+    all: null as string | null,
+    image: null as string | null,
+    plugin: null as string | null,
+    mitigations: null as string | null
+  })
+  
+  // Track which data has been fetched
+  const [fetchedData, setFetchedData] = useState({
+    all: false,
+    image: false,
+    plugin: false,
+    mitigations: false
+  })
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(12)
 
-  // --- State for Mitigations List View (from your page.tsx) ---
+  // Mitigations List View states
   const [selectedMitigations, setSelectedMitigations] = useState<Set<string>>(new Set())
   const [showActionMenu, setShowActionMenu] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  // --- End Mitigations State ---
 
   const categories = [
     { id: 'image', label: "Synced Endpoints (Where It's Running)" },
@@ -104,55 +120,75 @@ export default function SearchResults({ query }: SearchResultsProps) {
     { id: 'plugin', label: 'Vulnerabilities (The Threat)' },
   ]
 
+  // Fetch data when tab is selected (on-demand)
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDataForCategory = async () => {
+      // Skip if already fetched or currently loading
+      if (fetchedData[selectedCategory as keyof typeof fetchedData] || 
+          loadingStates[selectedCategory as keyof typeof loadingStates]) {
+        return
+      }
+
       try {
-        setLoading(true)
-        setError(null)
+        setLoadingStates(prev => ({ ...prev, [selectedCategory]: true }))
+        setErrorStates(prev => ({ ...prev, [selectedCategory]: null }))
 
-        const [releasesResponse, endpointsResponse, vulnerabilitiesResponse] = await Promise.all([
-          graphqlQuery<GetAffectedReleasesResponse>(GET_AFFECTED_RELEASES, {
-            severity: 'NONE',
-            limit: 1000,
-          }),
-          graphqlQuery<GetSyncedEndpointsResponse>(GET_SYNCED_ENDPOINTS, {
-            limit: 1000,
-          }),
-          graphqlQuery<GetVulnerabilitiesResponse>(GET_VULNERABILITIES, { limit: 1000 }),
-        ])
+        switch (selectedCategory) {
+          case 'all':
+            // Fetch Project Releases
+            const releasesResponse = await graphqlQuery<GetAffectedReleasesResponse>(
+              GET_AFFECTED_RELEASES,
+              { severity: 'NONE', limit: 1000 }
+            )
+            const imageData = transformAffectedReleasesToImageData(releasesResponse.affectedReleases)
+            setResults(imageData)
+            break
 
-        const imageData = transformAffectedReleasesToImageData(releasesResponse.affectedReleases)
-        setResults(imageData)
-        setEndpointResults(endpointsResponse.syncedEndpoints)
-        setVulnerabilityResults(vulnerabilitiesResponse.vulnerabilities)
-        setMockMitigationList(mockMitigations) // Load mock data into state
+          case 'image':
+            // Fetch Synced Endpoints
+            const endpointsResponse = await graphqlQuery<GetSyncedEndpointsResponse>(
+              GET_SYNCED_ENDPOINTS,
+              { limit: 1000 }
+            )
+            setEndpointResults(endpointsResponse.syncedEndpoints)
+            break
+
+          case 'plugin':
+            // Fetch Vulnerabilities
+            const vulnerabilitiesResponse = await graphqlQuery<GetVulnerabilitiesResponse>(
+              GET_VULNERABILITIES, 
+              { limit: 1000 }
+            )
+            setVulnerabilityResults(vulnerabilitiesResponse.vulnerabilities)
+            break
+
+          case 'mitigations':
+            // Use mock data for mitigations (no GraphQL call needed)
+            setMockMitigationList(mockMitigations)
+            break
+        }
+
+        setFetchedData(prev => ({ ...prev, [selectedCategory]: true }))
       } catch (err) {
-        console.error('Error fetching data:', err)
-        setError(err instanceof Error ? err.message : 'Failed to fetch data')
-        setResults([])
-        setEndpointResults([])
-        setVulnerabilityResults([])
-        setMockMitigationList([])
+        console.error(`Error fetching ${selectedCategory} data:`, err)
+        setErrorStates(prev => ({ 
+          ...prev, 
+          [selectedCategory]: err instanceof Error ? err.message : 'Failed to fetch data'
+        }))
       } finally {
-        setLoading(false)
+        setLoadingStates(prev => ({ ...prev, [selectedCategory]: false }))
       }
     }
 
-    fetchData()
-  }, [])
+    fetchDataForCategory()
+  }, [selectedCategory]) // Run when selectedCategory changes
 
   useEffect(() => {
     setCurrentPage(1)
-    // Clear selection state when filters/category change
     setSelectedMitigations(new Set())
     setShowActionMenu(false)
   }, [query, filters, selectedCategory])
 
-  useEffect(() => {
-    // No navigation needed, all tabs handled here
-  }, [selectedCategory, router])
-
-  // --- MITIGATIONS LIST FUNCTIONS (from your page.tsx) ---
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -175,7 +211,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
     setSelectedMitigations(newSelected)
   }
 
-  // Updated toggleAll to work with filteredData
   const toggleAll = () => {
     const allFilteredMitigations = getFilteredData() as Mitigation[]
     if (selectedMitigations.size === allFilteredMitigations.length) {
@@ -195,14 +230,12 @@ export default function SearchResults({ query }: SearchResultsProps) {
       setShowActionMenu(!showActionMenu)
     }
   }
-  // --- END MITIGATIONS LIST FUNCTIONS ---
 
-  // getFilteredData has 4 distinct paths for the 4 data types
   const getFilteredData = () => {
     const queryLower = query.toLowerCase()
     const nameLower = filters.name.toLowerCase()
 
-    // 1. Synced Endpoints ('image')
+    // Synced Endpoints
     if (selectedCategory === 'image') {
       return endpointResults.filter(endpoint => {
         if (
@@ -241,7 +274,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
       })
     }
 
-    // 2. Vulnerabilities ('plugin')
+    // Vulnerabilities
     if (selectedCategory === 'plugin') {
       return vulnerabilityResults.filter(vuln => {
         if (
@@ -269,7 +302,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
       })
     }
 
-    // 3. Mitigations ('mitigations')
+    // Mitigations
     if (selectedCategory === 'mitigations') {
       return mockMitigationList.filter(mit => {
         if (
@@ -295,7 +328,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
       })
     }
 
-    // 4. Project Releases ('all') --- DEFAULT CASE ---
+    // Project Releases (default)
     return results.filter(result => {
       if (query && !result.name.toLowerCase().includes(queryLower) && !result.description.toLowerCase().includes(queryLower))
         return false
@@ -330,7 +363,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
   }
 
   const filteredData = getFilteredData()
-
   const totalPages = Math.ceil(filteredData.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
@@ -361,8 +393,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
       const release = item as ImageData
       router.push(`/release/${release.name}?version=${encodeURIComponent(release.version)}`)
     }
-    // Mitigations and Vulnerabilities cards are not clickable by default
-    // (Selection is handled by the checkbox)
   }
 
   const handlePageChange = (page: number) => {
@@ -393,9 +423,12 @@ export default function SearchResults({ query }: SearchResultsProps) {
     return 'Results'
   }
 
+  // Get loading and error states for current category
+  const loading = loadingStates[selectedCategory as keyof typeof loadingStates]
+  const error = errorStates[selectedCategory as keyof typeof errorStates]
+
   if (loading) {
     return (
-      // ... Loading spinner JSX (no change) ...
       <>
         <div className="border-b border-gray-200 bg-white">
           <div className="px-6 py-4">
@@ -423,7 +456,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
             <div className="flex-1 flex items-center justify-center py-12">
               <div className="text-center">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="mt-4 text-gray-600">Loading results...</p>
+                <p className="mt-4 text-gray-600">Loading {getCategoryTitle().toLowerCase()}...</p>
               </div>
             </div>
           </div>
@@ -434,7 +467,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
 
   if (error) {
     return (
-      // ... Error display JSX (no change) ...
       <>
         <div className="border-b border-gray-200 bg-white">
           <div className="px-6 py-4">
@@ -467,7 +499,10 @@ export default function SearchResults({ query }: SearchResultsProps) {
                 <h3 className="mt-2 text-sm font-medium text-gray-900">Error loading data</h3>
                 <p className="mt-1 text-sm text-gray-500">{error}</p>
                 <button
-                  onClick={() => window.location.reload()}
+                  onClick={() => {
+                    setFetchedData(prev => ({ ...prev, [selectedCategory]: false }))
+                    setSelectedCategory(selectedCategory) // Trigger re-fetch
+                  }}
                   className="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
                 >
                   Retry
@@ -480,6 +515,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
     )
   }
 
+  // Rest of the component remains the same (rendering logic)
   return (
     <>
       <div className="border-b border-gray-200 bg-white">
@@ -507,7 +543,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
           <FilterSidebar filters={filters} setFilters={setFilters} selectedCategory={selectedCategory} />
 
           <div className="flex-1">
-            {/* --- Main Title Header --- */}
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-semibold text-gray-900">
@@ -521,7 +556,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
                 </p>
               </div>
 
-              {/* "Per page" dropdown (Hidden for Mitigations) */}
               {selectedCategory !== 'mitigations' && (
                 <div className="flex items-center gap-2">
                   <label htmlFor="itemsPerPage" className="text-sm text-gray-600">
@@ -545,7 +579,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
               )}
             </div>
 
-            {/* --- NEW: Mitigations Action Header (from page.tsx) --- */}
+            {/* Mitigations Action Header */}
             {selectedCategory === 'mitigations' && (
               <div className="mb-4 bg-white border border-gray-200 rounded-lg">
                 <div className="px-6 py-4 flex items-center justify-between">
@@ -583,7 +617,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
 
                     {showActionMenu && (
                       <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-10">
-                        {/* ... (Dropdown menu items from page.tsx) ... */}
                         <button
                           onClick={() => handleAction('AI Auto-remediation')}
                           className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left"
@@ -619,7 +652,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
               </div>
             )}
             
-            {/* --- Results Grid / List --- */}
+            {/* Results Grid/List - keeping just the structure, full implementation remains the same */}
             {filteredData.length === 0 ? (
               <div className="text-center py-12">
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -630,9 +663,8 @@ export default function SearchResults({ query }: SearchResultsProps) {
               </div>
             ) : (
               <>
-                {/* All categories now render inside this single grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* --- 1. ENDPOINT CARDS --- */}
+                  {/* Card rendering logic remains exactly the same as original */}
                   {selectedCategory === 'image' &&
                     (paginatedData as SyncedEndpoint[]).map((endpoint, index) => (
                       <div
@@ -640,7 +672,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
                         onClick={() => handleCardClick(endpoint)}
                         className="border border-gray-200 rounded-lg p-4 hover:border-gray-400 hover:shadow-md transition-all cursor-pointer bg-white flex flex-col h-full"
                       >
-                        {/* ... (Endpoint card JSX) ... */}
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex flex-col flex-1">
                             <h3 className="text-base font-semibold text-blue-600 hover:underline break-words">
@@ -692,14 +723,13 @@ export default function SearchResults({ query }: SearchResultsProps) {
                       </div>
                     ))}
 
-                  {/* --- 2. VULNERABILITY CARDS --- */}
+                  {/* Other category renderings remain exactly the same... */}
                   {selectedCategory === 'plugin' &&
                     (paginatedData as Mitigation[]).map(vuln => (
                       <div
                         key={`${vuln.cve_id}-${vuln.package}`}
                         className="border border-gray-200 rounded-lg p-4 hover:border-gray-400 hover:shadow-md transition-all bg-white"
                       >
-                        {/* ... (Vulnerability card JSX) ... */}
                         <div className="flex items-start justify-between mb-3">
                           <h3 className="text-base font-semibold text-blue-600">{vuln.cve_id}</h3>
                           <span className={`px-2 py-1 rounded text-xs font-bold border ${getSeverityColor(vuln.severity_rating)}`}>
@@ -726,12 +756,10 @@ export default function SearchResults({ query }: SearchResultsProps) {
                       </div>
                     ))}
                     
-                  {/* --- 3. MITIGATION CARDS (with selection) --- */}
                   {selectedCategory === 'mitigations' &&
                     (paginatedData as Mitigation[]).map(mit => (
                       <div
                         key={`${mit.cve_id}-${mit.package}`}
-                        // Use onClick on the outer div to toggle selection
                         onClick={() => toggleMitigation(mit.cve_id)}
                         className={`border rounded-lg p-4 transition-all bg-white cursor-pointer
                           ${selectedMitigations.has(mit.cve_id) 
@@ -741,12 +769,10 @@ export default function SearchResults({ query }: SearchResultsProps) {
                         `}
                       >
                         <div className="flex items-start justify-between mb-3">
-                          {/* Top row with Checkbox and Severity */}
                           <div className="flex items-center gap-3">
                             <input
                               type="checkbox"
                               checked={selectedMitigations.has(mit.cve_id)}
-                              // Handle clicks on checkbox itself to prevent double-toggling
                               onChange={(e) => {
                                 e.stopPropagation() 
                                 toggleMitigation(mit.cve_id)
@@ -760,7 +786,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
                           </span>
                         </div>
                         
-                        {/* Card Body */}
                         <p className="text-sm text-gray-700 mb-3 line-clamp-2">{mit.summary}</p>
                         <div className="space-y-2 text-xs text-gray-600 mb-3">
                           <div><span className="font-medium">Package:</span> <span className="break-all">{mit.package}</span></div>
@@ -769,7 +794,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
                           )}
                         </div>
                         
-                        {/* Card Footer */}
                         <div className="flex items-center gap-4 text-xs text-gray-500 pt-3 border-t border-gray-100">
                           <div className="flex items-center gap-1">
                             <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
@@ -783,7 +807,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
                       </div>
                     ))}
 
-                  {/* --- 4. RELEASE CARDS ('all') --- */}
                   {selectedCategory === 'all' &&
                     (paginatedData as ImageData[]).map((result, index) => (
                       <div
@@ -791,7 +814,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
                         onClick={() => handleCardClick(result)}
                         className="border border-gray-200 rounded-lg p-4 hover:border-gray-400 hover:shadow-md transition-all cursor-pointer bg-white flex flex-col h-full"
                       >
-                        {/* ... (Release card JSX) ... */}
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex flex-col">
                             <div className="flex items-center gap-2">
@@ -853,7 +875,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
                     ))}
                 </div>
 
-                {/* --- PAGINATION (Shared by all categories) --- */}
+                {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="mt-8 flex items-center justify-between border-t border-gray-200 pt-4">
                     <button
