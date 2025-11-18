@@ -5,6 +5,13 @@ import { graphqlQuery, GET_AFFECTED_ENDPOINTS } from '@/lib/graphql'
 import { GetAffectedEndpointsResponse, AffectedEndpoint } from '@/lib/types'
 import { getRelativeTime } from '@/lib/dataTransform'
 
+// --- Material UI Icon Imports ---
+import CloseIcon from '@mui/icons-material/Close'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import Inventory2Icon from '@mui/icons-material/Inventory2'
+import InventoryIcon from '@mui/icons-material/Inventory'
+import AccessTimeIcon from '@mui/icons-material/AccessTime'
+
 interface EndpointsModalProps {
   isOpen: boolean
   onClose: () => void
@@ -87,9 +94,7 @@ export default function EndpointsModal({ isOpen, onClose, releaseName, releaseVe
                 onClick={onClose}
                 className="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <CloseIcon className="h-6 w-6" />
               </button>
             </div>
 
@@ -103,9 +108,8 @@ export default function EndpointsModal({ isOpen, onClose, releaseName, releaseVe
                 </div>
               ) : error ? (
                 <div className="text-center py-12">
-                  <svg className="mx-auto h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
+                  {/* Error icon colored red */}
+                  <ErrorOutlineIcon sx={{ color: 'rgb(248, 113, 113)' }} className="mx-auto h-12 w-12 text-red-400" />
                   <h3 className="mt-2 text-sm font-medium text-gray-900">Error loading endpoints</h3>
                   <p className="mt-1 text-sm text-gray-500">{error}</p>
                   <button
@@ -117,9 +121,8 @@ export default function EndpointsModal({ isOpen, onClose, releaseName, releaseVe
                 </div>
               ) : endpoints.length === 0 ? (
                 <div className="text-center py-12">
-                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                  </svg>
+                  {/* No endpoints icon colored neutral blue/gray */}
+                  <Inventory2Icon sx={{ color: 'rgb(96, 165, 250)' }} className="mx-auto h-12 w-12 text-gray-400" />
                   <h3 className="mt-2 text-sm font-medium text-gray-900">No endpoints found</h3>
                   <p className="mt-1 text-sm text-gray-500">This release is not currently deployed to any endpoints</p>
                 </div>
@@ -141,9 +144,8 @@ export default function EndpointsModal({ isOpen, onClose, releaseName, releaseVe
 
                       <div className="flex items-center gap-4 text-xs text-gray-500">
                         <div className="flex items-center gap-1">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                          </svg>
+                          {/* Endpoint Type icon colored gray */}
+                          <InventoryIcon sx={{ color: 'rgb(107, 114, 128)' }} className="w-4 h-4" />
                           <span>Type: <span className="font-medium text-gray-700">{endpoint.endpoint_type}</span></span>
                         </div>
                         <div className="flex items-center gap-1">
@@ -152,9 +154,8 @@ export default function EndpointsModal({ isOpen, onClose, releaseName, releaseVe
                           </span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
+                          {/* Last Sync icon colored gray */}
+                          <AccessTimeIcon sx={{ color: 'rgb(107, 114, 128)' }} className="w-4 h-4" />
                           <span>Last sync: <span className="font-medium text-gray-700">{getRelativeTime(endpoint.last_sync)}</span></span>
                         </div>
                       </div>

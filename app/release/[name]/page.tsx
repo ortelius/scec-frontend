@@ -13,6 +13,28 @@ import {
   estimatePullCount,
 } from '@/lib/dataTransform'
 
+// --- Material UI Icon Imports ---
+// Note: CrisisAlertIcon is no longer used, as the bomb font icon is used instead.
+import SettingsIcon from '@mui/icons-material/Settings'
+import SecurityIcon from '@mui/icons-material/Security'
+import Inventory2Icon from '@mui/icons-material/Inventory2'
+import SearchIcon from '@mui/icons-material/Search'
+import DownloadIcon from '@mui/icons-material/Download'
+import WarningIcon from '@mui/icons-material/Warning'
+import StarIcon from '@mui/icons-material/Star'
+import LinkIcon from '@mui/icons-material/Link'
+import BuildIcon from '@mui/icons-material/Build'
+import AltRouteIcon from '@mui/icons-material/AltRoute'
+import HistoryIcon from '@mui/icons-material/History'
+import ConstructionIcon from '@mui/icons-material/Construction'
+import VerifiedIcon from '@mui/icons-material/Verified' 
+
+// Specific Icons for Severity
+import WhatshotIcon from '@mui/icons-material/Whatshot' // High (Fire)
+import NotificationsIcon from '@mui/icons-material/Notifications' // Medium (Bell)
+import FlashOnIcon from '@mui/icons-material/FlashOn' // Low (Flash)
+
+
 export default function ReleaseVersionDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -34,7 +56,7 @@ export default function ReleaseVersionDetailPage() {
 
   // Filter state
   const [selectedSeverities, setSelectedSeverities] = useState<string[]>(['critical', 'high', 'medium', 'low', 'clean'])
-  const [packageFilter, setPackageFilter] = useState<string>('')
+  const [packageFilter, setPackageFilter] = useState('')
   const [searchCVE, setSearchCVE] = useState('')
 
   useEffect(() => {
@@ -56,13 +78,9 @@ export default function ReleaseVersionDetailPage() {
             const sbomData = JSON.parse(releaseData.sbom.content)
             const components = sbomData.components || []
             pkgData = components
-              .filter((c: any) => c.type !== 'file' && c.type !== 'application')
+              .filter((c: any) => c.type !== 'file') // skip files
               .map((c: any) => {
-                let identifier = c.purl
-                if (!identifier && c['bom-ref']) {
-                  identifier = c['bom-ref']
-                }
-
+                let identifier = c.purl || c['bom-ref'] || c.name
                 // Strip version from PURL if present
                 if (identifier) {
                   if (identifier.includes('/') && !identifier.startsWith('pkg:')) {
@@ -70,11 +88,10 @@ export default function ReleaseVersionDetailPage() {
                   }
                   identifier = identifier.replace(/@[^@]*$/, '')
                 }
-
                 return {
-                  name: identifier || c.name,
+                  name: identifier,
                   version: c.version || 'unknown',
-                  purl: identifier || c.name
+                  purl: identifier
                 }
               })
           }
@@ -116,37 +133,19 @@ export default function ReleaseVersionDetailPage() {
     </div>
   )
 
-  const vulnCounts = countVulnerabilitiesBySeverity(vulnerabilities)
-  const isOfficial = release.project_type === 'docker'
-  const pulls = estimatePullCount(vulnerabilities.length, isOfficial)
-  const publisher = isOfficial ? 'Docker Official Image' : 'Community'
-
-  const mostRecentVulnDate = vulnerabilities.length > 0
-    ? vulnerabilities.reduce((latest, v) => new Date(v.modified) > latest ? new Date(v.modified) : latest, new Date(0))
-    : new Date()
-
-  const updated = getRelativeTime(mostRecentVulnDate.toISOString())
-  const openssfScore = release.openssf_score || 'N/A'
-  const syncedEndpoints = release.synced_endpoints?.length || 0
-
-  const uniquePackages = packages.filter((pkg, index, self) =>
-    index === self.findIndex((p) => p.name === pkg.name && p.version === pkg.version)
-  )
-
+  // --- Combine vulnerabilities and packages ---
   const vulnByPackage = vulnerabilities.reduce((acc, v) => {
     if (!acc[v.package]) acc[v.package] = []
     acc[v.package].push(v)
     return acc
   }, {} as Record<string, typeof vulnerabilities>)
 
-  // Merge packages + vulnerabilities, CLEAN rows always added
-  const allPackageNames = Array.from(new Set([...uniquePackages.map(p => p.name), ...vulnerabilities.map(v => v.package)]))
+  const allPackageNames = Array.from(new Set([...packages.map(p => p.name), ...vulnerabilities.map(v => v.package)]))
 
   const combinedData = allPackageNames.flatMap(pkgName => {
-    const pkg = uniquePackages.find(p => p.name === pkgName)
+    const pkg = packages.find(p => p.name === pkgName)
     const vulns = vulnByPackage[pkgName] || []
 
-    // Filter by free text package search
     if (packageFilter && !pkgName.toLowerCase().includes(packageFilter.toLowerCase())) return []
 
     const filteredVulns = vulns
@@ -157,14 +156,13 @@ export default function ReleaseVersionDetailPage() {
       return filteredVulns.map(v => ({
         cve_id: v.cve_id,
         severity: v.severity_rating?.toLowerCase() || 'unknown',
-        score: v.severity_score || 0,
+        score: v.severity_score ?? 0,
         package: pkgName,
         version: v.affected_version || pkg?.version || 'unknown',
         fixed_in: v.fixed_in?.join(', ') || '—'
       }))
     }
 
-    // CLEAN row (only if no vulns exist for that package)
     if (selectedSeverities.includes('clean')) {
       return [{
         cve_id: '—',
@@ -179,19 +177,10 @@ export default function ReleaseVersionDetailPage() {
     return []
   })
 
-  // Default sort: by score descending, then package name
   combinedData.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score
     return a.package.localeCompare(b.package)
   })
-
-  const stripVersionFromPurl = (purl: string | undefined, packageName: string): string => {
-    if (!purl) return packageName
-    if (purl.includes('/') && !purl.startsWith('pkg:')) {
-      return purl.split('/').pop() || purl
-    }
-    return purl.replace(/@[^@]*$/, '')
-  }
 
   const downloadSBOM = () => {
     if (!release.sbom?.content) return
@@ -204,165 +193,320 @@ export default function ReleaseVersionDetailPage() {
     URL.revokeObjectURL(url)
   }
 
+  const openssfScore = release.openssf_scorecard_score ?? 'N/A'
+  const syncedEndpoints = release.synced_endpoints?.length || 0
+
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} />
       <SyncedEndpoints isOpen={isEndpointsModalOpen} onClose={() => setIsEndpointsModalOpen(false)} releaseName={release.name} releaseVersion={release.version} />
 
-      <div className="px-6 py-6">
-        <div className="flex gap-6">
-          {/* Sidebar */}
-          <aside className="w-full lg:w-64 flex-shrink-0">
-            <div className="bg-white border border-gray-200 rounded-lg p-4 sticky top-20">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-900">Filters</h3>
-                {(selectedSeverities.length < 5 || packageFilter) && (
-                  <button
-                    onClick={() => {
-                      setSelectedSeverities(['critical', 'high', 'medium', 'low', 'clean'])
-                      setPackageFilter('')
-                      setSearchCVE('')
-                    }}
-                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    Clear all
-                  </button>
-                )}
-              </div>
-
-              <div className="mb-6">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">Filter by Severity</h4>
-                <div className="space-y-2">
-                  {['critical', 'high', 'medium', 'low', 'clean'].map(level => (
-                    <label key={level} className="flex items-center cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        checked={selectedSeverities.includes(level)}
-                        onChange={() => {
-                          setSelectedSeverities(prev =>
-                            prev.includes(level) ? prev.filter(s => s !== level) : [...prev, level]
-                          )
-                        }}
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">
-                        {level.charAt(0).toUpperCase() + level.slice(1)}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">Filter by Package</h4>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Search package name..."
-                  value={packageFilter}
-                  onChange={e => setPackageFilter(e.target.value)}
-                />
-              </div>
-
-              <div className="mb-6">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">Search CVE ID</h4>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={searchCVE}
-                  onChange={e => setSearchCVE(e.target.value)}
-                  placeholder="Filter by CVE ID..."
-                />
-              </div>
-
-              {release.sbom?.content && (
+      <div className="px-6 py-6 flex gap-6">
+        {/* Sidebar */}
+        <aside className="w-full lg:w-64 flex-shrink-0">
+          <div className="bg-white border border-gray-200 rounded-lg p-4 sticky top-20">
+            {/* Filter Header: Material UI Icon */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <SettingsIcon sx={{ width: 20, height: 20, color: 'rgb(37, 99, 235)' }} /> {/* Blue color */}
+                Filters
+              </h3>
+              {(selectedSeverities.length < 5 || packageFilter || searchCVE) && (
                 <button
-                  onClick={downloadSBOM}
-                  className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  onClick={() => {
+                    setSelectedSeverities(['critical', 'high', 'medium', 'low', 'clean'])
+                    setPackageFilter('')
+                    setSearchCVE('')
+                  }}
+                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
                 >
-                  Download SBOM
+                  Clear all
                 </button>
               )}
             </div>
-          </aside>
 
-          {/* Main content */}
-          <main className="flex-1 space-y-6">
-            {/* Summary Card */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center bg-gray-50 p-4 rounded-lg">
-              <div>
-                <p className="text-sm text-gray-600">Vulnerabilities</p>
-                <div className="flex justify-center gap-1 mt-1 flex-wrap">
-                  {vulnCounts.critical > 0 && <span className="inline-block px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium">{vulnCounts.critical} C</span>}
-                  {vulnCounts.high > 0 && <span className="inline-block px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs font-medium">{vulnCounts.high} H</span>}
-                  {vulnCounts.medium > 0 && <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-medium">{vulnCounts.medium} M</span>}
-                  {vulnCounts.low > 0 && <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">{vulnCounts.low} L</span>}
-                </div>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">OpenSSF Score</p>
-                <p className="font-bold text-lg">{openssfScore}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Synced Endpoints</p>
-                <p className="font-bold text-lg">{syncedEndpoints}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Packages</p>
-                <p className="font-bold text-lg">{packages.length}</p>
+            {/* Filter by Severity: Material UI Icon */}
+            <div className="mb-6">
+              <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <SecurityIcon sx={{ width: 16, height: 16, color: 'rgb(22, 163, 74)' }} /> {/* Green color for Security/Shield */}
+                Filter by Severity
+              </h4>
+              <div className="space-y-2">
+                {['critical', 'high', 'medium', 'low', 'clean'].map(level => (
+                  <label key={level} className="flex items-center cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={selectedSeverities.includes(level)}
+                      onChange={() => {
+                        setSelectedSeverities(prev =>
+                          prev.includes(level) ? prev.filter(s => s !== level) : [...prev, level]
+                        )
+                      }}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">
+                      {level.charAt(0).toUpperCase() + level.slice(1)}
+                    </span>
+                  </label>
+                ))}
               </div>
             </div>
 
-            {/* Combined Table */}
-            {combinedData.length > 0 && (
-              <div className="overflow-auto max-h-[600px] border rounded-lg">
-                <table className="w-full table-auto min-w-[700px]">
-                  <thead className="bg-gray-100 sticky top-0 z-10">
+            {/* Filter by Package: Material UI Icon */}
+            <div className="mb-6">
+              <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <Inventory2Icon sx={{ width: 16, height: 16, color: 'rgb(59, 130, 246)' }} /> {/* Blue color for Package */}
+                Filter by Package
+              </h4>
+              <input
+                type="text"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={packageFilter}
+                onChange={e => setPackageFilter(e.target.value)}
+                placeholder="Search package name..."
+              />
+            </div>
+
+            {/* Search CVE ID: Material UI Icon */}
+            <div className="mb-6">
+              <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <SearchIcon sx={{ width: 16, height: 16, color: 'rgb(107, 114, 128)' }} /> {/* Gray color for Search */}
+                Search CVE ID
+              </h4>
+              <input
+                type="text"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={searchCVE}
+                onChange={e => setSearchCVE(e.target.value)}
+                placeholder="Filter by CVE ID..."
+              />
+            </div>
+
+            {release.sbom?.content && (
+              <button
+                onClick={downloadSBOM}
+                className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+              >
+                <DownloadIcon sx={{ width: 16, height: 16 }} />
+                Download SBOM
+              </button>
+            )}
+          </div>
+        </aside>
+
+        {/* Main content */}
+        <main className="flex-1 space-y-6">
+          {/* Summary Card - Icons (Material UI) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div>
+              <p className="text-xs text-gray-600 flex justify-center items-center gap-1"><WarningIcon sx={{ width: 16, height: 16, color: 'rgb(234, 88, 12)' }} /> Vulnerabilities</p>
+              <p className="font-medium text-lg text-gray-900">{vulnerabilities.length}</p>
+            </div>
+            <div>
+              {/* OpenSSF Score icon uses SecurityIcon */}
+              <p className="text-xs text-gray-600 flex justify-center items-center gap-1"><SecurityIcon sx={{ width: 16, height: 16, color: 'rgb(22, 163, 74)' }} /> OpenSSF Score</p>
+              <p className="font-medium text-lg text-gray-900">{openssfScore}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-600 flex justify-center items-center gap-1"><LinkIcon sx={{ width: 16, height: 16, color: 'rgb(37, 99, 235)' }} /> Synced Endpoints</p>
+              <p className="font-medium text-lg text-gray-900">{syncedEndpoints}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-600 flex justify-center items-center gap-1"><Inventory2Icon sx={{ width: 16, height: 16, color: 'rgb(107, 114, 128)' }} /> Packages</p>
+              <p className="font-medium text-lg text-gray-900">{packages.length}</p>
+            </div>
+          </div>
+
+
+          {/* Combined CVE + Packages Table (max-h-[300px]) */}
+          {combinedData.length > 0 && (
+            <div className="overflow-auto max-h-[300px] border rounded-lg">
+              <table className="w-full table-auto min-w-[700px]">
+                <thead className="bg-gray-100 sticky top-0 z-10">
+                  <tr>
+                    <th className="px-4 py-2 text-left border-b">CVE ID</th>
+                    <th className="px-4 py-2 text-left border-b">Severity</th>
+                    <th className="px-4 py-2 text-left border-b">Score</th>
+                    <th className="px-4 py-2 text-left border-b">Package</th>
+                    <th className="px-4 py-2 text-left border-b">Version</th>
+                    <th className="px-4 py-2 text-left border-b">Fixed In</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {combinedData.map((row, index) => (
+                    <tr key={index} className="border-b hover:bg-gray-50">
+                      <td className="px-4 py-2">{row.cve_id}</td>
+                      <td className="px-4 py-2">
+                        {row.severity === 'clean' ? (
+                          <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800 flex items-center gap-1 w-fit">
+                            <StarIcon sx={{ width: 12, height: 12, color: 'rgb(22, 163, 74)' }} /> CLEAN
+                          </span>
+                        ) : (
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            row.severity === 'critical'
+                              ? 'bg-red-100 text-red-800'
+                              : row.severity === 'high'
+                              ? 'bg-orange-100 text-orange-800'
+                              : row.severity === 'medium'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-blue-100 text-blue-800'
+                          } flex items-center gap-1 w-fit`}>
+                            {/* Critical uses Material Symbol Font Icon for 'bomb' */}
+                            {row.severity === 'critical' ? (
+                                <span className="material-symbols-outlined" style={{ 
+                                    fontSize: '12px', 
+                                    width: '12px', 
+                                    height: '12px', 
+                                    color: 'rgb(185, 28, 28)', 
+                                    lineHeight: '1', 
+                                    marginRight: '4px'
+                                }}>
+                                    bomb
+                                </span>
+                            ) : 
+                             /* High uses WhatshotIcon (Fire) */
+                             row.severity === 'high' ? <WhatshotIcon sx={{ width: 12, height: 12, color: 'rgb(194, 65, 12)' }} /> : 
+                             /* Medium now uses NotificationsIcon (Bell) */
+                             row.severity === 'medium' ? <NotificationsIcon sx={{ width: 12, height: 12, color: 'rgb(202, 138, 4)' }} /> : 
+                             /* Low now uses WarningIcon (Warning) */
+                             <WarningIcon sx={{ width: 12, height: 12, color: 'rgb(29, 78, 216)' }} />} {row.severity.toUpperCase()}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2">{row.score}</td>
+                      <td className="px-4 py-2">{row.package}</td>
+                      <td className="px-4 py-2">{row.version}</td>
+                      <td className="px-4 py-2">{row.fixed_in}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Git Details - Icons updated to Material UI */}
+          <section className="mt-6 p-4 border rounded-lg bg-gray-50">
+            {/* Main Header: Changed to BuildIcon (Build/Tools) */}
+            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                <BuildIcon sx={{ width: 20, height: 20, color: 'rgb(100, 116, 139)' }} /> {/* Slate color */}
+                Source & Build Details
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1 text-sm text-gray-700">
+              
+              {/* Source Control: AltRouteIcon */}
+              <div>
+                <h4 className="text-md font-semibold text-gray-900 mt-2 mb-1 flex items-center gap-2">
+                    <AltRouteIcon sx={{ width: 16, height: 16, color: 'rgb(59, 130, 246)' }} />
+                    Source Control
+                </h4>
+                <ul className="space-y-1">
+                  <li><span className="font-medium">Commit:</span> {release.git_commit || '—'}</li>
+                  <li><span className="font-medium">Branch:</span> {release.git_branch || '—'}</li>
+                  <li><span className="font-medium">Tag:</span> {release.git_tag || '—'}</li>
+                  <li><span className="font-medium">Repo:</span> {release.git_repo || '—'}</li>
+                  <li><span className="font-medium">Org:</span> {release.git_org || '—'}</li>
+                  <li><span className="font-medium">URL:</span> {release.git_url || '—'}</li>
+                  <li><span className="font-medium">Project:</span> {release.git_repo_project || '—'}</li>
+                </ul>
+              </div>
+
+              {/* Container Artifacts: Inventory2Icon (similar to box/container) */}
+              <div>
+                <h4 className="text-md font-semibold text-gray-900 mt-2 mb-1 flex items-center gap-2">
+                    <Inventory2Icon sx={{ width: 16, height: 16, color: 'rgb(20, 184, 166)' }} /> {/* Teal color */}
+                    Container Artifacts
+                </h4>
+                <ul className="space-y-1">
+                  <li><span className="font-medium">Content SHA:</span> {release.content_sha || '—'}</li>
+                  <li><span className="font-medium">Docker Repo:</span> {release.docker_repo || '—'}</li>
+                  <li><span className="font-medium">Docker Tag:</span> {release.docker_tag || '—'}</li>
+                  <li><span className="font-medium">Docker SHA:</span> {release.docker_sha || '—'}</li>
+                  <li><span className="font-medium">Basename:</span> {release.basename || '—'}</li>
+                  <li><span className="font-medium">Commit Verified:</span> {release.git_verify_commit !== undefined ? (release.git_verify_commit ? 'Yes' : 'No') : '—'}</li>
+                  <li><span className="font-medium">Signed Off By:</span> {release.git_signed_off_by || '—'}</li>
+                </ul>
+              </div>
+
+              {/* Commit & Contribution Stats: HistoryIcon */}
+              <div>
+                <h4 className="text-md font-semibold text-gray-900 mt-2 mb-1 flex items-center gap-2">
+                    <HistoryIcon sx={{ width: 16, height: 16, color: 'rgb(124, 58, 237)' }} /> {/* Violet color */}
+                    Metrics & Timestamps
+                </h4>
+                <ul className="space-y-1">
+                  <li><span className="font-medium">Commit Timestamp:</span> {release.git_commit_timestamp || '—'}</li>
+                  <li><span className="font-medium">Commit Authors:</span> {release.git_commit_authors || '—'}</li>
+                  <li><span className="font-medium">Committers Count:</span> {release.git_committescnt || '—'}</li>
+                  <li><span className="font-medium">Total Committers Count:</span> {release.git_total_committescnt || '—'}</li>
+                  <li><span className="font-medium">Contrib Percentage:</span> {release.git_contrib_percentage || '—'}</li>
+                  <li><span className="font-medium">Lines Added:</span> {release.git_lines_added || '—'}</li>
+                  <li><span className="font-medium">Lines Deleted:</span> {release.git_lines_deleted || '—'}</li>
+                  <li><span className="font-medium">Lines Total:</span> {release.git_lines_total || '—'}</li>
+                  <li><span className="font-medium">Previous Component Commit:</span> {release.git_prev_comp_commit || '—'}</li>
+                </ul>
+              </div>
+
+              {/* Build Metadata: ConstructionIcon (Helmet/Safety/Build) */}
+              <div className="lg:col-span-3">
+                <h4 className="text-md font-semibold text-gray-900 mt-2 mb-1 flex items-center gap-2">
+                    <ConstructionIcon sx={{ width: 16, height: 16, color: 'rgb(249, 115, 22)' }} /> {/* Orange color */}
+                    Build Environment
+                </h4>
+                <ul className="space-y-1 grid grid-cols-2 md:grid-cols-4">
+                  <li><span className="font-medium">Build Date:</span> {release.build_date || '—'}</li>
+                  <li><span className="font-medium">Build ID:</span> {release.build_id || '—'}</li>
+                  <li><span className="font-medium">Build Number:</span> {release.build_num || '—'}</li>
+                  <li><span className="font-medium">Build URL:</span> {release.build_url || '—'}</li>
+                </ul>
+              </div>
+
+            </div>
+          </section>
+
+          {/* OpenSSF Scorecard - SecurityIcon */}
+          {release.scorecard_result && (
+            <section className="mt-6 p-4 border rounded-lg bg-gray-50">
+              {/* Header: Increased size and weight */}
+              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                <SecurityIcon sx={{ width: 20, height: 20, color: 'rgb(22, 163, 74)' }} /> {/* Green color for verification/security */}
+                OpenSSF Scorecard
+              </h3>
+              <p className="text-sm text-gray-600 mb-2">
+                Aggregate Score: <span className="font-medium text-gray-900">{release.scorecard_result.Score || '—'}</span> (Version: {release.scorecard_result.Scorecard.Version})
+              </p>
+              
+              <div className="overflow-x-auto border rounded-lg mt-4">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-100">
                     <tr>
-                      <th className="px-4 py-2 text-left border-b">CVE ID</th>
-                      <th className="px-4 py-2 text-left border-b">Severity</th>
-                      <th className="px-4 py-2 text-left border-b">Score</th>
-                      <th className="px-4 py-2 text-left border-b">Package</th>
-                      <th className="px-4 py-2 text-left border-b">Version</th>
-                      <th className="px-4 py-2 text-left border-b">Fixed In</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">Check Name</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">Score</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {combinedData.map((row, index) => (
-                      <tr key={index} className="border-b hover:bg-gray-50">
-                        <td className="px-4 py-2">{row.cve_id}</td>
-                        <td className="px-4 py-2">
-                          {row.severity === 'clean' ? (
-                            <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
-                              CLEAN
-                            </span>
-                          ) : (
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${
-                              row.severity === 'critical'
-                                ? 'bg-red-100 text-red-800'
-                                : row.severity === 'high'
-                                ? 'bg-orange-100 text-orange-800'
-                                : row.severity === 'medium'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-blue-100 text-blue-800'
-                            }`}>
-                              {row.severity.toUpperCase()}
-                            </span>
-                          )}
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {release.scorecard_result.Checks.map((check, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50">
+                        {/* Removed bold/strong from data and kept align-top */}
+                        <td className="px-4 py-2 align-top whitespace-normal text-sm text-gray-900">
+                          {check.Name}
                         </td>
-                        <td className="px-4 py-2">{row.score}</td>
-                        <td className="px-4 py-2">{row.package}</td>
-                        <td className="px-4 py-2">{row.version}</td>
-                        <td className="px-4 py-2">{row.fixed_in}</td>
+                        <td className="px-4 py-2 align-top whitespace-nowrap text-sm text-gray-700">
+                          {check.Score}
+                        </td>
+                        <td className="px-4 py-2 align-top text-sm text-gray-700 break-words max-w-sm">
+                          {check.Reason ?? '—'}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            )}
+            </section>
+          )}
 
-          </main>
-        </div>
+        </main>
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-// lib/graphql.ts - UPDATED VERSION with separate queries
+// lib/graphql.ts - UPDATED VERSION
 
 const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:3000/api/v1/graphql'
 
@@ -27,7 +27,9 @@ export async function graphqlQuery<T>(query: string, variables?: Record<string, 
   return json.data
 }
 
-// Existing queries
+// ------------------ QUERIES ------------------
+
+// Fetch a single release with full fields including OpenSSF Scorecard
 export const GET_RELEASE = `
   query GetRelease($name: String!, $version: String!) {
     release(name: $name, version: $version) {
@@ -62,10 +64,35 @@ export const GET_RELEASE = `
         full_purl
         fixed_in
       }
+      openssf_scorecard_score
+      scorecard_result {
+        Date
+        Repo {
+          Name
+          Commit
+        }
+        Scorecard {
+          Version
+          Commit
+        }
+        Score
+        Checks {
+          Name
+          Score
+          Reason
+          Details
+          Documentation {
+            Short
+            URL
+          }
+        }
+        Metadata
+      }
     }
   }
 `
 
+// Affected releases for vulnerabilities page
 export const GET_AFFECTED_RELEASES = `
   query GetAffectedReleases($severity: Severity!, $limit: Int) {
     affectedReleases(severity: $severity, limit: $limit) {
@@ -92,6 +119,7 @@ export const GET_AFFECTED_RELEASES = `
   }
 `
 
+// Synced endpoints query
 export const GET_SYNCED_ENDPOINTS = `
   query GetSyncedEndpoints($limit: Int) {
     syncedEndpoints(limit: $limit) {
@@ -116,6 +144,7 @@ export const GET_SYNCED_ENDPOINTS = `
   }
 `
 
+// Affected endpoints for a release
 export const GET_AFFECTED_ENDPOINTS = `
   query GetAffectedEndpoints($name: String!, $version: String!) {
     affectedEndpoints(name: $name, version: $version) {
@@ -129,7 +158,7 @@ export const GET_AFFECTED_ENDPOINTS = `
   }
 `
 
-// Query for Mitigations page (uses "mitigations" query)
+// Mitigations page query
 export const GET_MITIGATIONS = `
   query GetMitigations($limit: Int) {
     mitigations(limit: $limit) {
@@ -147,7 +176,7 @@ export const GET_MITIGATIONS = `
   }
 `
 
-// New query for Vulnerabilities page (uses "vulnerabilities" query - OPTION 2 only)
+// Vulnerabilities page query
 export const GET_VULNERABILITIES = `
   query GetVulnerabilities($limit: Int) {
     vulnerabilities(limit: $limit) {
