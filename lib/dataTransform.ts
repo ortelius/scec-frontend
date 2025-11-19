@@ -97,8 +97,8 @@ export function transformAffectedReleasesToImageData(
       vulnerabilities: vulnCounts,
       dependency_count: firstRelease.dependency_count,
       signed: false,
-      openssfScore: firstRelease.openssf_scorecard_score,
-      syncedEndpoints: firstRelease.synced_endpoint_count || 0,
+      openssfScore: firstRelease.openssf_scorecard_score ?? 0,
+      syncedEndpoints: firstRelease.synced_endpoint_count ?? 0,
     })
   })
 
