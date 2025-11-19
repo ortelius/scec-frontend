@@ -14,7 +14,6 @@ import {
 } from '@/lib/dataTransform'
 
 // --- Material UI Icon Imports ---
-// Note: CrisisAlertIcon is no longer used, as the bomb font icon is used instead.
 import SettingsIcon from '@mui/icons-material/Settings'
 import SecurityIcon from '@mui/icons-material/Security'
 import Inventory2Icon from '@mui/icons-material/Inventory2'
@@ -26,6 +25,8 @@ import BuildIcon from '@mui/icons-material/Build'
 import AltRouteIcon from '@mui/icons-material/AltRoute'
 import HistoryIcon from '@mui/icons-material/History'
 import ConstructionIcon from '@mui/icons-material/Construction'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight' // Used for expand/collapse toggle
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft' // Used for expand/collapse toggle
 
 // Specific Icons for Severity
 import WhatshotIcon from '@mui/icons-material/Whatshot' // High (Fire)
@@ -42,6 +43,9 @@ export default function ReleaseVersionDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isEndpointsModalOpen, setIsEndpointsModalOpen] = useState(false)
+  
+  // STATE: Controls sidebar/filter visibility
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
   const releaseVersion = params.name as string
   const version = searchParams.get('version') || 'latest'
@@ -199,115 +203,141 @@ export default function ReleaseVersionDetailPage() {
       <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} />
       <SyncedEndpoints isOpen={isEndpointsModalOpen} onClose={() => setIsEndpointsModalOpen(false)} releaseName={release.name} releaseVersion={release.version} />
 
-      <div className="px-6 py-6 flex gap-6">
-        {/* Sidebar */}
-        <aside className="w-full lg:w-64 flex-shrink-0">
-          <div className="bg-white border border-gray-200 rounded-lg p-4 sticky top-20">
-            {/* Filter Header: Material UI Icon */}
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <SettingsIcon sx={{ width: 20, height: 20, color: 'rgb(37, 99, 235)' }} /> {/* Blue color */}
-                Filters
-              </h3>
-              {(selectedSeverities.length < 5 || packageFilter || searchCVE) && (
-                <button
-                  onClick={() => {
-                    setSelectedSeverities(['critical', 'high', 'medium', 'low', 'clean'])
-                    setPackageFilter('')
-                    setSearchCVE('')
-                  }}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
+      {/* Main Flex Container: Dynamically adjusts gap based on sidebar state */}
+      <div className={`px-6 py-6 flex ${isSidebarOpen ? 'gap-6' : 'gap-2'}`}>
+        
+        {/* Sidebar Container: Dynamically adjusts width */}
+        <aside className={`flex-shrink-0 transition-all duration-300 ${isSidebarOpen ? 'w-full lg:w-64' : 'w-12'}`}>
+          
+          <div className="sticky top-20"> 
 
-            {/* Filter by Severity: Material UI Icon */}
-            <div className="mb-6">
-              <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <SecurityIcon sx={{ width: 16, height: 16, color: 'rgb(22, 163, 74)' }} /> {/* Green color for Security/Shield */}
-               Severity
-              </h4>
-              <div className="space-y-2">
-                {['critical', 'high', 'medium', 'low', 'clean'].map(level => (
-                  <label key={level} className="flex items-center cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={selectedSeverities.includes(level)}
-                      onChange={() => {
-                        setSelectedSeverities(prev =>
-                          prev.includes(level) ? prev.filter(s => s !== level) : [...prev, level]
-                        )
-                      }}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">
-                      {level.charAt(0).toUpperCase() + level.slice(1)}
-                    </span>
-                  </label>
-                ))}
+            {/* Filter Box (Includes header, filters, and toggle button) */}
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+              
+              {/* Filter Header & Toggle Button */}
+              <div className={`flex items-center justify-between mb-4 ${isSidebarOpen ? '' : 'justify-center'}`}>
+                  {isSidebarOpen ? (
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                          <SettingsIcon sx={{ width: 20, height: 20, color: 'rgb(37, 99, 235)' }} /> 
+                          Filters
+                      </h3>
+                  ) : (
+                      // Display only the icon when collapsed
+                      <SettingsIcon sx={{ width: 20, height: 20, color: 'rgb(37, 99, 235)' }} />
+                  )}
+                  
+                  <button 
+                      onClick={() => setIsSidebarOpen(prev => !prev)}
+                      className="text-gray-500 hover:text-blue-600 transition-colors"
+                      aria-label={isSidebarOpen ? "Collapse Filters" : "Expand Filters"}
+                  >
+                      {isSidebarOpen ? (
+                          <ChevronLeftIcon sx={{ width: 20, height: 20 }} />
+                      ) : (
+                          <ChevronRightIcon sx={{ width: 20, height: 20 }} />
+                      )}
+                  </button>
               </div>
-            </div>
 
-            {/* Filter by Package: Material UI Icon */}
-            <div className="mb-6">
-              <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <Inventory2Icon sx={{ width: 16, height: 16, color: 'rgb(59, 130, 246)' }} /> {/* Blue color for Package */}
-                Package
-              </h4>
-              <input
-                type="text"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={packageFilter}
-                onChange={e => setPackageFilter(e.target.value)}
-                placeholder="Search package name..."
-              />
-            </div>
+              {/* Collapsible Content Wrapper (height and opacity controlled by isSidebarOpen) */}
+              <div className={`transition-all duration-300 overflow-hidden ${isSidebarOpen ? 'h-auto opacity-100' : 'h-0 opacity-0'}`}>
+                  
+                  {/* Clear All button */}
+                  {(selectedSeverities.length < 5 || packageFilter || searchCVE) && (
+                      <div className="flex justify-end mb-4">
+                          <button
+                              onClick={() => {
+                                  setSelectedSeverities(['critical', 'high', 'medium', 'low', 'clean'])
+                                  setPackageFilter('')
+                                  setSearchCVE('')
+                              }}
+                              className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                          >
+                              Clear all
+                          </button>
+                      </div>
+                  )}
 
-            {/* Search CVE ID: Material UI Icon */}
-            <div className="mb-6">
-              <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <span 
-                    className="material-symbols-outlined" 
-                    style={{ 
-                        fontSize: '20px', 
-                        color: 'rgb(185, 28, 28)', // Red color
-                        lineHeight: '1'
-                    }}>
-                    threat_intelligence
-                </span>
-                CVE ID
-              </h4>
-              <input
-                type="text"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={searchCVE}
-                onChange={e => setSearchCVE(e.target.value)}
-                placeholder="Filter by CVE ID..."
-              />
-            </div>
-          </div> 
-          {/* END of sticky filter box */}
+                  {/* Filter by Severity: Material UI Icon */}
+                  <div className="mb-6">
+                      <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                          <SecurityIcon sx={{ width: 16, height: 16, color: 'rgb(22, 163, 74)' }} /> 
+                          Severity
+                      </h4>
+                      <div className="space-y-2">
+                          {['critical', 'high', 'medium', 'low', 'clean'].map(level => (
+                              <label key={level} className="flex items-center cursor-pointer group">
+                                  <input
+                                      type="checkbox"
+                                      checked={selectedSeverities.includes(level)}
+                                      onChange={() => {
+                                          setSelectedSeverities(prev =>
+                                              prev.includes(level) ? prev.filter(s => s !== level) : [...prev, level]
+                                          )
+                                      }}
+                                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                  />
+                                  <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">
+                                      {level.charAt(0).toUpperCase() + level.slice(1)}
+                                  </span>
+                              </label>
+                          ))}
+                      </div>
+                  </div>
 
-          {/* DOWNLOAD SBOM BUTTON - MOVED HERE, OUTSIDE THE FILTER BOX */}
-          {release.sbom?.content && (
-            <button
-              onClick={downloadSBOM}
-              className="w-full px-4 py-2 mt-4 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center gap-2"
-            >
-              <DownloadIcon sx={{ width: 16, height: 16 }} />
-              Download SBOM
-            </button>
-          )}
+                  {/* Filter by Package: Material UI Icon */}
+                  <div className="mb-6">
+                      <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                          <Inventory2Icon sx={{ width: 16, height: 16, color: 'rgb(59, 130, 246)' }} /> 
+                          Package
+                      </h4>
+                      <input
+                          type="text"
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          value={packageFilter}
+                          onChange={e => setPackageFilter(e.target.value)}
+                          placeholder="Search package name..."
+                      />
+                  </div>
+
+                  {/* Search CVE ID: Material Symbol Icon (threat_intelligence) */}
+                  <div className="mb-6">
+                      <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                          <span 
+                              className="material-symbols-outlined" 
+                              style={{ 
+                                  fontSize: '20px', 
+                                  color: 'rgb(185, 28, 28)', // Red color
+                                  lineHeight: '1'
+                              }}>
+                              threat_intelligence
+                          </span>
+                          CVE ID
+                      </h4>
+                      <input
+                          type="text"
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          value={searchCVE}
+                          onChange={e => setSearchCVE(e.target.value)}
+                          placeholder="Filter by CVE ID..."
+                      />
+                  </div>
+              </div> 
+              {/* END Collapsible Content Wrapper */}
+
+            </div> 
+            {/* END Filter Box */}
+          </div>
+          {/* END STICKY WRAPPER */}
+
         </aside>
 
         {/* Main content */}
         <main className="flex-1 space-y-6">
-          {/* Summary Card - Icons (Material UI) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center bg-gray-50 p-4 rounded-lg border border-gray-200">
+          {/* Summary Card - Icons (Material UI) - NOW WITH 5 COLUMNS INCLUDING DOWNLOAD BUTTON */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 text-center bg-gray-50 p-4 rounded-lg border border-gray-200">
             <div>
-              {/* Vulnerabilities */}
+              {/* Vulnerabilities - Material Symbol Icon (threat_intelligence) */}
               <p className="text-xs text-gray-600 flex justify-center items-center gap-1">
                 <span 
                     className="material-symbols-outlined" 
@@ -335,6 +365,22 @@ export default function ReleaseVersionDetailPage() {
               <p className="text-xs text-gray-600 flex justify-center items-center gap-1"><Inventory2Icon sx={{ width: 16, height: 16, color: 'rgb(107, 114, 128)' }} /> Packages</p>
               <p className="font-medium text-lg text-gray-900">{packages.length}</p>
             </div>
+            
+            {/* DOWNLOAD SBOM BUTTON - REVERTED TO CLEAN TEXT LINK STRUCTURE */}
+            {release.sbom?.content && (
+              <div className="flex flex-col items-center justify-center">
+                  <p className="text-xs text-gray-600 flex justify-center items-center gap-1">
+                      <DownloadIcon sx={{ width: 16, height: 16, color: 'rgb(37, 99, 235)' }} /> SBOM
+                  </p>
+                  <button
+                    onClick={downloadSBOM}
+                    // Cleaned-up style to act as a text link inside the grid cell
+                    className="font-medium text-lg text-gray-900 text-blue-600 hover:text-blue-800 transition-colors bg-transparent border-none p-0 cursor-pointer"
+                  >
+                      Download
+                  </button>
+              </div>
+            )}
           </div>
 
 
