@@ -18,7 +18,6 @@ import {
 import SettingsIcon from '@mui/icons-material/Settings'
 import SecurityIcon from '@mui/icons-material/Security'
 import Inventory2Icon from '@mui/icons-material/Inventory2'
-import SearchIcon from '@mui/icons-material/Search'
 import DownloadIcon from '@mui/icons-material/Download'
 import WarningIcon from '@mui/icons-material/Warning'
 import StarIcon from '@mui/icons-material/Star'
@@ -27,12 +26,10 @@ import BuildIcon from '@mui/icons-material/Build'
 import AltRouteIcon from '@mui/icons-material/AltRoute'
 import HistoryIcon from '@mui/icons-material/History'
 import ConstructionIcon from '@mui/icons-material/Construction'
-import VerifiedIcon from '@mui/icons-material/Verified' 
 
 // Specific Icons for Severity
 import WhatshotIcon from '@mui/icons-material/Whatshot' // High (Fire)
 import NotificationsIcon from '@mui/icons-material/Notifications' // Medium (Bell)
-import FlashOnIcon from '@mui/icons-material/FlashOn' // Low (Flash)
 
 
 export default function ReleaseVersionDetailPage() {
@@ -230,7 +227,7 @@ export default function ReleaseVersionDetailPage() {
             <div className="mb-6">
               <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <SecurityIcon sx={{ width: 16, height: 16, color: 'rgb(22, 163, 74)' }} /> {/* Green color for Security/Shield */}
-                Filter by Severity
+               Severity
               </h4>
               <div className="space-y-2">
                 {['critical', 'high', 'medium', 'low', 'clean'].map(level => (
@@ -257,7 +254,7 @@ export default function ReleaseVersionDetailPage() {
             <div className="mb-6">
               <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <Inventory2Icon sx={{ width: 16, height: 16, color: 'rgb(59, 130, 246)' }} /> {/* Blue color for Package */}
-                Filter by Package
+                Package
               </h4>
               <input
                 type="text"
@@ -271,8 +268,16 @@ export default function ReleaseVersionDetailPage() {
             {/* Search CVE ID: Material UI Icon */}
             <div className="mb-6">
               <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <SearchIcon sx={{ width: 16, height: 16, color: 'rgb(107, 114, 128)' }} /> {/* Gray color for Search */}
-                Search CVE ID
+                <span 
+                    className="material-symbols-outlined" 
+                    style={{ 
+                        fontSize: '20px', 
+                        color: 'rgb(185, 28, 28)', // Red color
+                        lineHeight: '1'
+                    }}>
+                    threat_intelligence
+                </span>
+                CVE ID
               </h4>
               <input
                 type="text"
@@ -282,17 +287,19 @@ export default function ReleaseVersionDetailPage() {
                 placeholder="Filter by CVE ID..."
               />
             </div>
+          </div> 
+          {/* END of sticky filter box */}
 
-            {release.sbom?.content && (
-              <button
-                onClick={downloadSBOM}
-                className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center gap-2"
-              >
-                <DownloadIcon sx={{ width: 16, height: 16 }} />
-                Download SBOM
-              </button>
-            )}
-          </div>
+          {/* DOWNLOAD SBOM BUTTON - MOVED HERE, OUTSIDE THE FILTER BOX */}
+          {release.sbom?.content && (
+            <button
+              onClick={downloadSBOM}
+              className="w-full px-4 py-2 mt-4 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+            >
+              <DownloadIcon sx={{ width: 16, height: 16 }} />
+              Download SBOM
+            </button>
+          )}
         </aside>
 
         {/* Main content */}
@@ -300,7 +307,19 @@ export default function ReleaseVersionDetailPage() {
           {/* Summary Card - Icons (Material UI) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center bg-gray-50 p-4 rounded-lg border border-gray-200">
             <div>
-              <p className="text-xs text-gray-600 flex justify-center items-center gap-1"><WarningIcon sx={{ width: 16, height: 16, color: 'rgb(234, 88, 12)' }} /> Vulnerabilities</p>
+              {/* Vulnerabilities */}
+              <p className="text-xs text-gray-600 flex justify-center items-center gap-1">
+                <span 
+                    className="material-symbols-outlined" 
+                    style={{ 
+                        fontSize: '20px', 
+                        color: 'rgb(185, 28, 28)', // Red color
+                        lineHeight: '1'
+                    }}>
+                    threat_intelligence
+                </span>
+                Vulnerabilities
+              </p>
               <p className="font-medium text-lg text-gray-900">{vulnerabilities.length}</p>
             </div>
             <div>
