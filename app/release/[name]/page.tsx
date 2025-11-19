@@ -27,6 +27,7 @@ import HistoryIcon from '@mui/icons-material/History'
 import ConstructionIcon from '@mui/icons-material/Construction'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight' // Used for expand/collapse toggle
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft' // Used for expand/collapse toggle
+import ArrowBackIcon from '@mui/icons-material/ArrowBack' // Added for the back button
 
 // Specific Icons for Severity
 import WhatshotIcon from '@mui/icons-material/Whatshot' // High (Fire)
@@ -195,7 +196,8 @@ export default function ReleaseVersionDetailPage() {
   }
 
   const openssfScore = release.openssf_scorecard_score ?? 'N/A'
-  const syncedEndpoints = release.synced_endpoints?.length || 0
+  const syncedEndpoints = release.synced_endpoint_count || 0
+  const syncedEndpointsList = release.synced_endpoints || []
 
 
   return (
@@ -259,7 +261,7 @@ export default function ReleaseVersionDetailPage() {
                   )}
 
                   {/* Filter by Severity: Material UI Icon */}
-                  <div className="mb-6">
+                  <div className="mb-6"> 
                       <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
                           <SecurityIcon sx={{ width: 16, height: 16, color: 'rgb(22, 163, 74)' }} /> 
                           Severity
@@ -286,22 +288,24 @@ export default function ReleaseVersionDetailPage() {
                   </div>
 
                   {/* Filter by Package: Material UI Icon */}
-                  <div className="mb-6">
+                  <div className="mb-6"> 
                       <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
                           <Inventory2Icon sx={{ width: 16, height: 16, color: 'rgb(59, 130, 246)' }} /> 
                           Package
                       </h4>
                       <input
                           type="text"
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          // FIX: Use arbitrary width (w-[98%]) and margin auto (mx-auto) to center and provide space for the focus ring.
+                          // Updated placeholder for consistency
+                          className="w-[98%] mx-auto px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 block"
                           value={packageFilter}
                           onChange={e => setPackageFilter(e.target.value)}
-                          placeholder="Search package name..."
+                          placeholder="Filter by package name..." // <<< CHANGED HERE
                       />
                   </div>
 
                   {/* Search CVE ID: Material Symbol Icon (threat_intelligence) */}
-                  <div className="mb-6">
+                  <div className="mb-6"> 
                       <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
                           <span 
                               className="material-symbols-outlined" 
@@ -316,7 +320,8 @@ export default function ReleaseVersionDetailPage() {
                       </h4>
                       <input
                           type="text"
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          // FIX: Use arbitrary width (w-[98%]) and margin auto (mx-auto) to center and provide space for the focus ring.
+                          className="w-[98%] mx-auto px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 block"
                           value={searchCVE}
                           onChange={e => setSearchCVE(e.target.value)}
                           placeholder="Filter by CVE ID..."
@@ -334,6 +339,23 @@ export default function ReleaseVersionDetailPage() {
 
         {/* Main content */}
         <main className="flex-1 space-y-6">
+          
+          {/* Back Button & Release Title */}
+          <div className="flex items-center gap-4 mb-6">
+              <button
+                  onClick={() => router.back()}
+                  className="flex items-center text-blue-600 hover:text-blue-700 transition-colors text-sm font-medium"
+                  aria-label="Go back to previous page"
+              >
+                  <ArrowBackIcon sx={{ width: 16, height: 16 }} />
+                  <span className="ml-1">Back</span>
+              </button>
+              <h1 className="text-2xl font-bold text-gray-900">
+                  {release.name} <span className="text-gray-500 font-normal">({release.version})</span>
+              </h1>
+          </div>
+          {/* End Back Button & Title */}
+
           {/* Summary Card - Icons (Material UI) - NOW WITH 5 COLUMNS INCLUDING DOWNLOAD BUTTON */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 text-center bg-gray-50 p-4 rounded-lg border border-gray-200">
             <div>
@@ -383,11 +405,69 @@ export default function ReleaseVersionDetailPage() {
             )}
           </div>
 
+          {/* New Synced Endpoints Section (Before CVE/Package Table) */}
+          <section className="mt-6 p-4 border rounded-lg bg-gray-50">
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <LinkIcon sx={{ width: 20, height: 20, color: 'rgb(37, 99, 235)' }} /> 
+              Synced Endpoints ({syncedEndpointsList.length})
+            </h3>
+            <div className="overflow-x-auto border rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200">
+                {/* HEADERS: Always visible */}
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">Endpoint Name</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Environment</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">Last Sync Time</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {syncedEndpointsList.length > 0 ? (
+                    // Display data rows if list is not empty
+                    syncedEndpointsList.map((endpoint, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 align-top whitespace-normal text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
+                          {endpoint.endpoint_name}
+                        </td>
+                        <td className="px-4 py-2 align-top whitespace-nowrap text-sm text-gray-700">
+                          {endpoint.environment}
+                        </td>
+                        <td className="px-4 py-2 align-top whitespace-nowrap text-sm text-gray-700">
+                          {endpoint.last_sync ? getRelativeTime(endpoint.last_sync) : '—'}
+                        </td>
+                        <td className="px-4 py-2 align-top whitespace-nowrap text-sm text-gray-700">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              endpoint.status === 'active' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-red-100 text-red-800'
+                            } w-fit`}>
+                            {endpoint.status.toUpperCase()}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    // Display 'No data' message if list is empty
+                    <tr>
+                      <td colSpan={4} className="px-4 py-8 text-center bg-white">
+                        <p className="text-gray-500 font-medium text-lg">No synced endpoints found for this release.</p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+          {/* End New Synced Endpoints Section */}
 
-          {/* Combined CVE + Packages Table (max-h-[300px]) */}
-          {combinedData.length > 0 && (
-            <div className="overflow-auto max-h-[300px] border rounded-lg">
+
+          {/* Combined CVE + Packages Table */}
+          {/* FIX: Removed max-h-[300px] to allow natural scrolling and fixed keyboard overlap. */}
+          <div className="overflow-auto border rounded-lg"> 
+            {combinedData.length > 0 ? (
               <table className="w-full table-auto min-w-[700px]">
+                {/* HEADERS: Always visible when data exists */}
                 <thead className="bg-gray-100 sticky top-0 z-10">
                   <tr>
                     <th className="px-4 py-2 text-left border-b">CVE ID</th>
@@ -423,7 +503,7 @@ export default function ReleaseVersionDetailPage() {
                                     fontSize: '12px', 
                                     width: '12px', 
                                     height: '12px', 
-                                    color: 'rgb(185, 28, 28)', 
+                                    color: 'rgb(185, 28, 28)',
                                     lineHeight: '1', 
                                     marginRight: '4px'
                                 }}>
@@ -447,8 +527,33 @@ export default function ReleaseVersionDetailPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
-          )}
+            ) : (
+              // When NO data is found, render a table structure with headers 
+              // and a single cell spanning all columns to display the message.
+              <table className="w-full table-auto min-w-[700px]">
+                {/* HEADERS: Displayed even when empty */}
+                <thead className="bg-gray-100 sticky top-0 z-10">
+                  <tr>
+                    <th className="px-4 py-2 text-left border-b">CVE ID</th>
+                    <th className="px-4 py-2 text-left border-b">Severity</th>
+                    <th className="px-4 py-2 text-left border-b">Score</th>
+                    <th className="px-4 py-2 text-left border-b">Package</th>
+                    <th className="px-4 py-2 text-left border-b">Version</th>
+                    <th className="px-4 py-2 text-left border-b">Fixed In</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {/* Message spans all 6 columns */}
+                    <td colSpan={6} className="px-4 py-8 text-center bg-white">
+                      <p className="text-gray-500 font-medium text-lg">No data found matching current filters.</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            )}
+          </div>
+
 
           {/* Git Details - Icons updated to Material UI */}
           <section className="mt-6 p-4 border rounded-lg bg-gray-50">

@@ -70,4 +70,116 @@ export interface Release {
   vulnerabilities: Vulnerability[]
   openssf_scorecard_score?: number
   scorecard_result?: ScorecardResult
+  synced_endpoint_count?: number
+  synced_endpoints?: AffectedEndpoint[] // <-- NEW FIELD
+}
+
+// Additional types for other queries
+
+export interface AffectedRelease {
+  cve_id: string
+  summary?: string
+  details?: string
+  severity_score?: number
+  severity_rating?: string
+  published?: string
+  modified: string
+  aliases?: string[]
+  package: string
+  affected_version?: string
+  full_purl?: string
+  fixed_in?: string[]
+  release_name: string
+  release_version: string
+  content_sha?: string
+  project_type: string
+  openssf_scorecard_score?: number
+  dependency_count: number
+  synced_endpoint_count?: number
+}
+
+export interface GetAffectedReleasesResponse {
+  affectedReleases: AffectedRelease[]
+}
+
+export interface GetReleaseResponse {
+  release: Release
+}
+
+export interface SyncedEndpoint {
+  endpoint_name: string
+  endpoint_url: string
+  endpoint_type: string
+  environment: string
+  status: string
+  last_sync: string
+  release_count: number
+  total_vulnerabilities: {
+    critical: number
+    high: number
+    medium: number
+    low: number
+  }
+  releases: Array<{
+    release_name: string
+    release_version: string
+  }>
+}
+
+export interface GetSyncedEndpointsResponse {
+  syncedEndpoints: SyncedEndpoint[]
+}
+
+export interface AffectedEndpoint {
+  endpoint_name: string
+  endpoint_url: string
+  endpoint_type: string
+  environment: string
+  last_sync: string
+  status: string
+}
+
+export interface GetAffectedEndpointsResponse {
+  affectedEndpoints: AffectedEndpoint[]
+}
+
+export interface Mitigation {
+  cve_id: string
+  summary: string
+  severity_score: number
+  severity_rating: string
+  package: string
+  affected_version: string
+  full_purl: string
+  fixed_in: string[]
+  affected_releases: number
+  affected_endpoints: number
+}
+
+export interface GetVulnerabilitiesResponse {
+  vulnerabilities: Mitigation[]
+}
+
+export interface ImageData {
+  name: string
+  version: string
+  releaseDate: string
+  publisher: string
+  description: string
+  pulls: string
+  updated: string
+  verified: boolean
+  official: boolean
+  tags: string[]
+  longDescription?: string
+  vulnerabilities: {
+    critical: number
+    high: number
+    medium: number
+    low: number
+  }
+  dependency_count: number
+  signed: boolean
+  openssfScore: number
+  syncedEndpoints: number
 }
