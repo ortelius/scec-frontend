@@ -65,6 +65,15 @@ export const GET_RELEASE = `
         fixed_in
       }
       openssf_scorecard_score
+      synced_endpoint_count
+      synced_endpoints {
+        endpoint_name
+        endpoint_url
+        endpoint_type
+        environment
+        last_sync
+        status
+      }
       scorecard_result {
         Date
         Repo {
