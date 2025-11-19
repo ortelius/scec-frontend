@@ -13,8 +13,8 @@
     "next": "16.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "@mui/material": "^5.16.1",
-    "@mui/icons-material": "^5.16.1",
+    "@mui/material": "^7.0.0",
+    "@mui/icons-material": "^7.0.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5"
   },
