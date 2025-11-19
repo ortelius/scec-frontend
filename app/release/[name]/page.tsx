@@ -463,8 +463,8 @@ export default function ReleaseVersionDetailPage() {
 
 
           {/* Combined CVE + Packages Table */}
-          {/* FIX: Removed max-h-[300px] to allow natural scrolling and fixed keyboard overlap. */}
-          <div className="overflow-auto border rounded-lg"> 
+          {/* FIX: Set maximum height to max-h-96 (384px) to be close to 400px tall. */}
+          <div className="overflow-auto border rounded-lg max-h-96"> 
             {combinedData.length > 0 ? (
               <table className="w-full table-auto min-w-[700px]">
                 {/* HEADERS: Always visible when data exists */}
@@ -607,8 +607,8 @@ export default function ReleaseVersionDetailPage() {
                 <ul className="space-y-1">
                   <li><span className="font-medium">Commit Timestamp:</span> {release.git_commit_timestamp || '—'}</li>
                   <li><span className="font-medium">Commit Authors:</span> {release.git_commit_authors || '—'}</li>
-                  <li><span className="font-medium">Committers Count:</span> {release.git_committescnt || '—'}</li>
-                  <li><span className="font-medium">Total Committers Count:</span> {release.git_total_committescnt || '—'}</li>
+                  <li><span className="font-medium">Committers Count:</span> {release.git_committerscnt || '—'}</li>
+                  <li><span className="font-medium">Total Committers Count:</span> {release.git_total_committerscnt || '—'}</li>
                   <li><span className="font-medium">Contrib Percentage:</span> {release.git_contrib_percentage || '—'}</li>
                   <li><span className="font-medium">Lines Added:</span> {release.git_lines_added || '—'}</li>
                   <li><span className="font-medium">Lines Deleted:</span> {release.git_lines_deleted || '—'}</li>

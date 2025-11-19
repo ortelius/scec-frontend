@@ -40,9 +40,30 @@ export const GET_RELEASE = `
       content_sha
       git_commit
       git_branch
+      git_tag
+      git_repo
+      git_org
+      git_url
+      git_repo_project
+      git_verify_commit
+      git_signed_off_by
+      git_commit_timestamp
+      git_commit_authors
+      git_committerscnt
+      git_total_committerscnt
+      git_contrib_percentage
+      git_lines_added
+      git_lines_deleted
+      git_lines_total
+      git_prev_comp_commit
       docker_repo
       docker_tag
       docker_sha
+      basename
+      build_date 
+      build_id 
+      build_num 
+      build_url 
       sbom {
         key
         contentsha

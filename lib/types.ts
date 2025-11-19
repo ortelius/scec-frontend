@@ -63,15 +63,36 @@ export interface Release {
   content_sha?: string
   git_commit?: string
   git_branch?: string
+  git_tag?: string
+  git_repo?: string
+  git_org?: string;
+  git_url?: string;
+  git_repo_project?: string;
+  git_verify_commit?: boolean;
+  git_signed_off_by?: string;
+  git_commit_timestamp?: string;
+  git_commit_authors?: string;
+  git_committerscnt?: number;
+  git_total_committerscnt?: number;
+  git_contrib_percentage?: string;
+  git_lines_added?: number;
+  git_lines_deleted?: number;
+  git_lines_total?: number;
+  git_prev_comp_commit?: string;
   docker_repo?: string
   docker_tag?: string
   docker_sha?: string
+  basename?: string;
+  build_date?: string;
+  build_id?: string;
+  build_num?: string;
+  build_url?: string;
   sbom?: SBOM
   vulnerabilities: Vulnerability[]
   openssf_scorecard_score?: number
   scorecard_result?: ScorecardResult
   synced_endpoint_count?: number
-  synced_endpoints?: AffectedEndpoint[] // <-- NEW FIELD
+  synced_endpoints?: AffectedEndpoint[]
 }
 
 // Additional types for other queries
