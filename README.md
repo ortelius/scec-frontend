@@ -1,3 +1,4 @@
+
 # SCEC Frontend
 
 A Next.js 14 application that mimics the Ortelius search interface.
