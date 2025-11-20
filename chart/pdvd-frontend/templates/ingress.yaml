@@ -1,0 +1,63 @@
+---
+{{- $ingressType := default "glb" .Values.ingress.type }}
+
+{{- if eq $ingressType "glb" }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "microservice.name" . }}-ingress
+  labels:
+    app: {{ include "microservice.name" . }}
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    networking.gke.io/managed-certificates: {{ default "managed-cert" .Values.ingress.managedCertificate | quote }}
+    kubernetes.io/ingress.global-static-ip-name: {{ default "static-app-ip" .Values.ingress.staticIP | quote }}
+spec:
+  rules:
+    - host: {{ default "app.ortelius.io" .Values.ingress.host | quote }}
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ default (include "pdvd-backend" .) .Values.backend.serviceName | quote }}
+                port:
+                  number: {{ default 8080 .Values.backend.servicePort }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ default (include "microservice.name" .) .Values.frontend.serviceName | quote }}
+                port:
+                  number: {{ default 8080 .Values.frontend.servicePort }}
+{{- else if eq $ingressType "kind" }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "microservice.name" . }}-ingress
+  labels:
+    app: {{ include "microservice.name" . }}
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - host: {{ default "localhost" .Values.ingress.host | quote }}
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ default (include "pdvd-backend" .) .Values.backend.serviceName | quote }}
+                port:
+                  number: {{ default 8080 .Values.backend.servicePort }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ default (include "microservice.name" .) .Values.frontend.serviceName | quote }}
+                port:
+                  number: {{ default 8080 .Values.frontend.servicePort }}
+{{- end }}
+---

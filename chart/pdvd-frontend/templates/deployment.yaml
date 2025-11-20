@@ -1,0 +1,29 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "microservice.name" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "microservice.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "microservice.name" . }}
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: {{ include "microservice.name" . }}
+          image: "quay.io/ortelius/pdvd-frontend:main-v10.0.92-g2eebd3"
+          imagePullPolicy: Always
+          env:
+            - name: NEXT_PUBLIC_GRAPHQL_ENDPOINT
+              value: "https://app.ortelius.io/api/v1/graphql"
+          ports:
+            - name: http
+              containerPort: 8080
+
+---

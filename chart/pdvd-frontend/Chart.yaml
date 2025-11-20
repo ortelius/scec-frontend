@@ -1,0 +1,8 @@
+---
+apiVersion: v2
+description: Frontend microservice
+icon: https://ortelius.github.io/pdvd-charts/ortelius.svg
+name: pdvd-frontend
+type: application
+version: 12.0.0
+appVersion: 12.0.0
