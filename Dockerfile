@@ -17,8 +17,6 @@ RUN curl -fsSL https://rpm.nodesource.com/setup_23.x | bash -; \
 
 COPY . .
 
-EXPOSE 3000
-
 RUN npm run build
 
 CMD ["npm", "run", "start"]
