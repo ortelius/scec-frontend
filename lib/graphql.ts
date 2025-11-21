@@ -1,17 +1,17 @@
 // lib/graphql.ts - UPDATED VERSION
 
-const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:3000/api/v1/graphql'
+const GRAPHQL_ENDPOINT = (typeof process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT === 'string') ? process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT : 'http://localhost:3000/api/v1/graphql'
 
-export async function graphqlQuery<T>(query: string, variables?: Record<string, any>): Promise<T> {
+export async function graphqlQuery<T> (query: string, variables?: Record<string, any>): Promise<T> {
   const response = await fetch(GRAPHQL_ENDPOINT, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
       query,
-      variables,
-    }),
+      variables
+    })
   })
 
   if (!response.ok) {
@@ -20,8 +20,8 @@ export async function graphqlQuery<T>(query: string, variables?: Record<string, 
 
   const json = await response.json()
 
-  if (json.errors) {
-    throw new Error(json.errors[0]?.message || 'GraphQL query failed')
+  if ((json.errors != null) && json.errors.length > 0) {
+    throw new Error((json.errors[0]?.message != null) ? json.errors[0].message : 'GraphQL query failed')
   }
 
   return json.data

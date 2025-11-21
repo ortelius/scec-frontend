@@ -1,12 +1,12 @@
 import { AffectedRelease, ImageData, Vulnerability } from './types'
 
 // Helper to count vulnerabilities by severity
-export function countVulnerabilitiesBySeverity(vulnerabilities: Vulnerability[]) {
+export function countVulnerabilitiesBySeverity (vulnerabilities: Vulnerability[]): { critical: number, high: number, medium: number, low: number } {
   const counts = {
     critical: 0,
     high: 0,
     medium: 0,
-    low: 0,
+    low: 0
   }
 
   vulnerabilities.forEach(vuln => {
@@ -21,7 +21,7 @@ export function countVulnerabilitiesBySeverity(vulnerabilities: Vulnerability[])
 }
 
 // Helper to format relative time
-export function getRelativeTime(dateString: string): string {
+export function getRelativeTime (dateString: string): string {
   try {
     const date = new Date(dateString)
     const now = new Date()
@@ -40,18 +40,21 @@ export function getRelativeTime(dateString: string): string {
 }
 
 // Transform GraphQL AffectedRelease data to ImageData format for UI
-export function transformAffectedReleasesToImageData(
+export function transformAffectedReleasesToImageData (
   affectedReleases: AffectedRelease[]
 ): ImageData[] {
   // Group by release (name + version)
   const releaseMap = new Map<string, AffectedRelease[]>()
 
   affectedReleases.forEach(ar => {
-    const key = `${ar.release_name}:${ar.release_version}`
+    const key = `${String(ar.release_name)}:${String(ar.release_version)}`
     if (!releaseMap.has(key)) {
       releaseMap.set(key, [])
     }
-    releaseMap.get(key)!.push(ar)
+    const releases = releaseMap.get(key)
+    if (releases !== undefined) {
+      releases.push(ar)
+    }
   })
 
   // Transform each release group into ImageData
@@ -65,7 +68,7 @@ export function transformAffectedReleasesToImageData(
       critical: 0,
       high: 0,
       medium: 0,
-      low: 0,
+      low: 0
     }
 
     releases.forEach(r => {
@@ -85,20 +88,20 @@ export function transformAffectedReleasesToImageData(
     imageDataList.push({
       name: firstRelease.release_name,
       version: firstRelease.release_version,
-      releaseDate: firstRelease.published || new Date().toISOString(),
+      releaseDate: firstRelease.published ?? new Date().toISOString(),
       publisher: firstRelease.project_type === 'docker' ? 'Docker Official Image' : 'Community',
-      description: `${firstRelease.project_type} release with ${firstRelease.dependency_count} dependencies`,
+      description: `${String(firstRelease.project_type)} release with ${String(firstRelease.dependency_count)} dependencies`,
       pulls: firstRelease.dependency_count > 100 ? '1B+' : firstRelease.dependency_count > 50 ? '500M+' : '100M+',
       updated: getRelativeTime(mostRecentDate.toISOString()),
       verified: false,
       official: false,
       tags: ['latest', firstRelease.release_version, firstRelease.project_type],
-      longDescription: `${firstRelease.release_name} version ${firstRelease.release_version}`,
+      longDescription: `${String(firstRelease.release_name)} version ${String(firstRelease.release_version)}`,
       vulnerabilities: vulnCounts,
       dependency_count: firstRelease.dependency_count,
       signed: false,
       openssfScore: firstRelease.openssf_scorecard_score ?? 0,
-      syncedEndpoints: firstRelease.synced_endpoint_count ?? 0,
+      syncedEndpoints: firstRelease.synced_endpoint_count ?? 0
     })
   })
 
@@ -106,18 +109,18 @@ export function transformAffectedReleasesToImageData(
 }
 
 // Extract unique tags from a release
-export function extractTags(release: any): string[] {
+export function extractTags (release: any): string[] {
   const tags: string[] = ['latest']
 
-  if (release.version) {
+  if (typeof release.version === 'string') {
     tags.push(release.version)
   }
 
-  if (release.docker_tag) {
+  if (typeof release.docker_tag === 'string') {
     tags.push(release.docker_tag)
   }
 
-  if (release.project_type) {
+  if (typeof release.project_type === 'string') {
     tags.push(release.project_type)
   }
 
@@ -125,7 +128,7 @@ export function extractTags(release: any): string[] {
 }
 
 // Get pull count based on various factors (simplified)
-export function estimatePullCount(dependencies: number, isOfficial: boolean): string {
+export function estimatePullCount (dependencies: number, isOfficial: boolean): string {
   if (isOfficial) {
     if (dependencies > 200) return '10B+'
     if (dependencies > 100) return '5B+'
