@@ -9,10 +9,10 @@ metadata:
   labels:
     app: {{ include "microservice.name" . }}
   annotations:
-    kubernetes.io/ingress.class: "gce"
     networking.gke.io/managed-certificates: {{ default "managed-cert" .Values.ingress.managedCertificate | quote }}
     kubernetes.io/ingress.global-static-ip-name: {{ default "static-app-ip" .Values.ingress.staticIP | quote }}
 spec:
+  ingressClassName: "gce"
   rules:
     - host: {{ default "app.ortelius.io" .Values.ingress.host | quote }}
       http:
@@ -38,9 +38,8 @@ metadata:
   name: {{ include "microservice.name" . }}-ingress
   labels:
     app: {{ include "microservice.name" . }}
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
 spec:
+  ingressClassName: "traefik"
   rules:
     - host: {{ default "localhost" .Values.ingress.host | quote }}
       http:
