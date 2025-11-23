@@ -17,6 +17,25 @@ npm run dev
 
 3. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Install with Docker-Compose
+
+1. Install docker https://docs.docker.com/get-started/get-docker/
+
+2. Clone frontend application 
+```bash
+git clone https://github.com/ortelius/pdvd-frontend
+```
+
+3. Clone backend application 
+```bash
+git clone https://github.com/ortelius/pdvd-backend
+```
+
+4. Run docker-compose
+```bash
+docker-compose up
+```
+
 ## Features
 
 - Search results page with grid layout (no landing page)
