@@ -21,7 +21,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: NEXT_PUBLIC_GRAPHQL_ENDPOINT
-              value: "https://app.ortelius.io/api/v1/graphql"
+              value: {{ default "https://app.ortelius.io/api/v1/graphql"  .Values.graphqlEndpoint | quote }}
           ports:
             - name: http
               containerPort: 8080
