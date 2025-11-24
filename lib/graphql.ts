@@ -1,8 +1,36 @@
 // lib/graphql.ts - UPDATED VERSION
 
-const GRAPHQL_ENDPOINT = (typeof process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT === 'string') ? process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT : 'http://localhost:3000/api/v1/graphql'
+let cachedEndpoint: string | null = null
+
+async function getGraphQLEndpoint(): Promise<string> {
+  // Return cached value if available
+  if (cachedEndpoint) {
+    return cachedEndpoint
+  }
+
+  // In browser, fetch runtime config from API route
+  if (typeof window !== 'undefined') {
+    try {
+      const response = await fetch('/api/config')
+      const config = await response.json()
+      cachedEndpoint = config.graphqlEndpoint
+      return cachedEndpoint
+    } catch (error) {
+      console.error('Failed to fetch runtime config:', error)
+    }
+  }
+
+  // Server-side or fallback
+  if (typeof process !== 'undefined' && process.env.RUNTIME_GRAPHQL_ENDPOINT) {
+    return process.env.RUNTIME_GRAPHQL_ENDPOINT
+  }
+
+  // Default fallback
+  return 'http://localhost:3000/api/v1/graphql'
+}
 
 export async function graphqlQuery<T> (query: string, variables?: Record<string, any>): Promise<T> {
+  const GRAPHQL_ENDPOINT = await getGraphQLEndpoint()
   const response = await fetch(GRAPHQL_ENDPOINT, {
     method: 'POST',
     headers: {
