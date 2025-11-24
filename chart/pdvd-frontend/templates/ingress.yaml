@@ -38,12 +38,12 @@ metadata:
   name: {{ include "microservice.name" . }}-ingress
   labels:
     app: {{ include "microservice.name" . }}
+  # Removed NGINX debugging annotations
 spec:
-  # CHANGED: Use the NGINX Ingress Class
-  ingressClassName: "nginx"
+  # Using Traefik Ingress Class
+  ingressClassName: "traefik"
   rules:
-    - host: {{ default "localhost" .Values.ingress.host | quote }}
-      http:
+    - http: # Host rule removed for simple local access
         paths:
           - path: /api
             pathType: Prefix
