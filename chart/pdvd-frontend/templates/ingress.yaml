@@ -39,7 +39,8 @@ metadata:
   labels:
     app: {{ include "microservice.name" . }}
 spec:
-  ingressClassName: "traefik"
+  # CHANGED: Use the NGINX Ingress Class
+  ingressClassName: "nginx"
   rules:
     - host: {{ default "localhost" .Values.ingress.host | quote }}
       http:
