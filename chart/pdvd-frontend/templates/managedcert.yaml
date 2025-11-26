@@ -1,0 +1,12 @@
+---
+{{- $ingressType := default "glb" .Values.ingress.type }}
+{{- if eq $ingressType "glb" }}
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: {{ default "managed-cert" .Values.ingress.managedCertificate }}
+spec:
+  domains:
+    - {{ default "app.ortelius.io" .Values.ingress.host }}
+{{- end }}
+---
