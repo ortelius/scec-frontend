@@ -9,9 +9,9 @@ metadata:
   labels:
     app: {{ include "microservice.name" . }}
   annotations:
+    kubernetes.io/ingress.class: "gce"
     kubernetes.io/ingress.global-static-ip-name: {{ default "static-app-ip" .Values.ingress.staticIP | quote }}
 spec:
-  ingressClassName: "gce"
   rules:
     - host: {{ default "app.deployhub.com" .Values.ingress.host | quote }}
       http:
