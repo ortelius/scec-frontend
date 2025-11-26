@@ -9,12 +9,11 @@ metadata:
   labels:
     app: {{ include "microservice.name" . }}
   annotations:
-    networking.gke.io/managed-certificates: {{ default "managed-cert" .Values.ingress.managedCertificate | quote }}
     kubernetes.io/ingress.global-static-ip-name: {{ default "static-app-ip" .Values.ingress.staticIP | quote }}
 spec:
   ingressClassName: "gce"
   rules:
-    - host: {{ default "app.ortelius.io" .Values.ingress.host | quote }}
+    - host: {{ default "app.deployhub.com" .Values.ingress.host | quote }}
       http:
         paths:
           - path: /api
@@ -38,12 +37,10 @@ metadata:
   name: {{ include "microservice.name" . }}-ingress
   labels:
     app: {{ include "microservice.name" . }}
-  # Removed NGINX debugging annotations
 spec:
-  # Using Traefik Ingress Class
   ingressClassName: "traefik"
   rules:
-    - http: # Host rule removed for simple local access
+    - http:
         paths:
           - path: /api
             pathType: Prefix
