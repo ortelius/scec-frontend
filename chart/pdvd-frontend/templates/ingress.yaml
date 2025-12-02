@@ -11,6 +11,9 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "gce"
     kubernetes.io/ingress.global-static-ip-name: {{ default "static-app-ip" .Values.ingress.staticIP | quote }}
+    # LINK THE CERTIFICATE AND FRONTEND CONFIG
+    networking.gke.io/managed-certificates: {{ include "microservice.name" . }}-managed-cert
+    networking.gke.io/v1beta1.FrontendConfig: {{ include "microservice.name" . }}-frontend-config
 spec:
   rules:
     - host: {{ default "app.deployhub.com" .Values.ingress.host | quote }}
@@ -30,6 +33,26 @@ spec:
                 name: {{ include "microservice.name" . }}
                 port:
                   number: 8080
+---
+# DEFINE THE GOOGLE MANAGED CERTIFICATE
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: {{ include "microservice.name" . }}-managed-cert
+spec:
+  domains:
+    # Uses the variable if provided, otherwise defaults to app.deployhub.com
+    - {{ default "app.deployhub.com" .Values.ingress.host }}
+---
+# CONFIGURE HTTP TO HTTPS REDIRECT
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: {{ include "microservice.name" . }}-frontend-config
+spec:
+  redirectToHttps:
+    enabled: true
+
 {{- else if eq $ingressType "kind" }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress

@@ -1,9 +1,45 @@
-// lib/graphql.ts - UPDATED VERSION
+// lib/graphql.ts
 
-const GRAPHQL_ENDPOINT = '/api/v1/graphql'
+// We use a variable instead of a const so we can update it dynamically
+let activeGraphqlEndpoint: string | null = null
 
-export async function graphqlQuery<T> (query: string, variables?: Record<string, any>): Promise<T> {
-  const response = await fetch(GRAPHQL_ENDPOINT, {
+// Helper to get the endpoint. 
+// It fetches from /api/config only if we haven't done so yet.
+async function getGraphqlEndpoint(): Promise<string> {
+  if (activeGraphqlEndpoint) {
+    return activeGraphqlEndpoint
+  }
+
+  try {
+    // Fetch the configuration from the Next.js API route
+    const res = await fetch('/api/config')
+    
+    if (!res.ok) {
+      console.warn(`Failed to fetch /api/config (Status: ${res.status}). Falling back to default.`)
+      return '/api/v1/graphql'
+    }
+
+    const data = await res.json()
+    
+    // Validate the response contains the expected key
+    if (data.graphqlEndpoint) {
+      activeGraphqlEndpoint = data.graphqlEndpoint
+      return activeGraphqlEndpoint as string
+    }
+  } catch (error) {
+    console.error('Error fetching GraphQL config:', error)
+  }
+
+  // Fallback if the config endpoint fails
+  return '/api/v1/graphql'
+}
+
+export async function graphqlQuery<T>(query: string, variables?: Record<string, any>): Promise<T> {
+  // 1. Resolve the endpoint URL dynamically
+  const endpoint = await getGraphqlEndpoint()
+
+  // 2. Use the resolved endpoint for the request
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -28,6 +64,7 @@ export async function graphqlQuery<T> (query: string, variables?: Record<string,
 }
 
 // ------------------ QUERIES ------------------
+// (The queries below remain exactly as they were in your original file)
 
 // Fetch a single release with full fields including OpenSSF Scorecard
 export const GET_RELEASE = `
