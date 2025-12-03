@@ -25,13 +25,11 @@ import BuildIcon from '@mui/icons-material/Build'
 import AltRouteIcon from '@mui/icons-material/AltRoute'
 import HistoryIcon from '@mui/icons-material/History'
 import ConstructionIcon from '@mui/icons-material/Construction'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight' // Used for expand/collapse toggle
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft' // Used for expand/collapse toggle
-import ArrowBackIcon from '@mui/icons-material/ArrowBack' // Added for the back button
-
-// Specific Icons for Severity
-import WhatshotIcon from '@mui/icons-material/Whatshot' // High (Fire)
-import NotificationsIcon from '@mui/icons-material/Notifications' // Medium (Bell)
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import WhatshotIcon from '@mui/icons-material/Whatshot'
+import NotificationsIcon from '@mui/icons-material/Notifications'
 
 
 export default function ReleaseVersionDetailPage() {
@@ -45,7 +43,6 @@ export default function ReleaseVersionDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [isEndpointsModalOpen, setIsEndpointsModalOpen] = useState(false)
   
-  // STATE: Controls sidebar/filter visibility
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
   const releaseVersion = params.name as string
@@ -80,10 +77,9 @@ export default function ReleaseVersionDetailPage() {
             const sbomData = JSON.parse(releaseData.sbom.content)
             const components = sbomData.components || []
             pkgData = components
-              .filter((c: any) => c.type !== 'file') // skip files
+              .filter((c: any) => c.type !== 'file')
               .map((c: any) => {
                 let identifier = c.purl || c['bom-ref'] || c.name
-                // Strip version from PURL if present
                 if (identifier) {
                   if (identifier.includes('/') && !identifier.startsWith('pkg:')) {
                     identifier = identifier.split('/').pop() || identifier
@@ -93,7 +89,7 @@ export default function ReleaseVersionDetailPage() {
                 return {
                   name: identifier,
                   version: c.version || 'unknown',
-                  purl: identifier
+                  purl: c.purl || identifier  // Keep full purl for matching
                 }
               })
           }
@@ -135,54 +131,96 @@ export default function ReleaseVersionDetailPage() {
     </div>
   )
 
-  // --- Combine vulnerabilities and packages ---
-  const vulnByPackage = vulnerabilities.reduce((acc, v) => {
-    if (!acc[v.package]) acc[v.package] = []
-    acc[v.package].push(v)
-    return acc
-  }, {} as Record<string, typeof vulnerabilities>)
+  // ====================================================================
+  // FIXED LOGIC: Process packages individually, not grouped by name
+  // ====================================================================
+  
+  const combinedData: Array<{
+    cve_id: string
+    severity: string
+    score: number
+    package: string
+    version: string
+    fixed_in: string
+    full_purl?: string
+  }> = []
 
-  const allPackageNames = Array.from(new Set([...packages.map(p => p.name), ...vulnerabilities.map(v => v.package)]))
-
-  const combinedData = allPackageNames.flatMap(pkgName => {
-    const pkg = packages.find(p => p.name === pkgName)
-    const vulns = vulnByPackage[pkgName] || []
-
-    if (packageFilter && !pkgName.toLowerCase().includes(packageFilter.toLowerCase())) return []
-
-    const filteredVulns = vulns
-      .filter(v => selectedSeverities.includes(v.severity_rating?.toLowerCase() || 'unknown'))
-      .filter(v => !searchCVE || v.cve_id.includes(searchCVE))
-
-    if (filteredVulns.length > 0) {
-      return filteredVulns.map(v => ({
+  // First, add all vulnerable packages (from GraphQL)
+  vulnerabilities
+    .filter(v => selectedSeverities.includes(v.severity_rating?.toLowerCase() || 'unknown'))
+    .filter(v => !searchCVE || v.cve_id.includes(searchCVE))
+    .forEach(v => {
+      const packageName = v.package
+      if (packageFilter && !packageName.toLowerCase().includes(packageFilter.toLowerCase())) {
+        return
+      }
+      
+      combinedData.push({
         cve_id: v.cve_id,
         severity: v.severity_rating?.toLowerCase() || 'unknown',
         score: v.severity_score ?? 0,
-        package: pkgName,
-        version: v.affected_version || pkg?.version || 'unknown',
-        fixed_in: v.fixed_in?.join(', ') || '—'
-      }))
-    }
+        package: packageName,
+        version: v.affected_version || 'unknown',
+        fixed_in: v.fixed_in?.join(', ') || '—',
+        full_purl: v.full_purl
+      })
+    })
 
-    if (selectedSeverities.includes('clean')) {
-      return [{
-        cve_id: '—',
-        severity: 'clean',
-        score: 0,
-        package: pkgName,
-        version: pkg?.version || 'unknown',
-        fixed_in: '—'
-      }]
-    }
+  // Second, add clean packages (from SBOM) if "clean" filter is selected
+  if (selectedSeverities.includes('clean')) {
+    packages.forEach(pkg => {
+      // Apply package name filter
+      if (packageFilter && !pkg.name.toLowerCase().includes(packageFilter.toLowerCase())) {
+        return
+      }
 
-    return []
-  })
+      // Check if THIS SPECIFIC package version is vulnerable
+      // We need to match by full_purl or by name+version
+      const isVulnerable = vulnerabilities.some(v => {
+        // Try to match by full_purl first (most accurate)
+        if (v.full_purl && pkg.purl) {
+          // Both have full purls - compare them
+          // Note: SBOM purl might have version, vuln purl might not
+          // Extract base purl without version for comparison
+          const basePkgPurl = pkg.purl.split('@')[0]
+          const baseVulnPurl = v.full_purl.split('@')[0]
+          
+          // If base purls match, check version
+          if (basePkgPurl === baseVulnPurl) {
+            // Check if vulnerability affects this version
+            return v.affected_version === pkg.version
+          }
+        }
+        
+        // Fallback: match by package name and version
+        const vulnPackageName = v.package.split('@')[0] // Remove version if present
+        return vulnPackageName === pkg.name && v.affected_version === pkg.version
+      })
 
+      // Only add clean row if this specific version is NOT vulnerable
+      if (!isVulnerable) {
+        combinedData.push({
+          cve_id: '—',
+          severity: 'clean',
+          score: 0,
+          package: pkg.name,
+          version: pkg.version,
+          fixed_in: '—',
+          full_purl: pkg.purl
+        })
+      }
+    })
+  }
+
+  // Sort by score (highest first), then by package name
   combinedData.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score
     return a.package.localeCompare(b.package)
   })
+
+  // ====================================================================
+  // END OF FIXED LOGIC
+  // ====================================================================
 
   const downloadSBOM = () => {
     if (!release.sbom?.content) return
@@ -205,18 +243,14 @@ export default function ReleaseVersionDetailPage() {
       <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} handleSearch={handleSearch} />
       <SyncedEndpoints isOpen={isEndpointsModalOpen} onClose={() => setIsEndpointsModalOpen(false)} releaseName={release.name} releaseVersion={release.version} />
 
-      {/* Main Flex Container: Dynamically adjusts gap based on sidebar state */}
       <div className={`px-6 py-6 flex ${isSidebarOpen ? 'gap-6' : 'gap-2'}`}>
         
-        {/* Sidebar Container: Dynamically adjusts width */}
         <aside className={`flex-shrink-0 transition-all duration-300 ${isSidebarOpen ? 'w-full lg:w-64' : 'w-12'}`}>
           
           <div className="sticky top-20"> 
 
-            {/* Filter Box (Includes header, filters, and toggle button) */}
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               
-              {/* Filter Header & Toggle Button */}
               <div className={`flex items-center justify-between mb-4 ${isSidebarOpen ? '' : 'justify-center'}`}>
                   {isSidebarOpen ? (
                       <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -224,7 +258,6 @@ export default function ReleaseVersionDetailPage() {
                           Filters
                       </h3>
                   ) : (
-                      // Display only the icon when collapsed
                       <SettingsIcon sx={{ width: 20, height: 20, color: 'rgb(37, 99, 235)' }} />
                   )}
                   
@@ -241,10 +274,8 @@ export default function ReleaseVersionDetailPage() {
                   </button>
               </div>
 
-              {/* Collapsible Content Wrapper (height and opacity controlled by isSidebarOpen) */}
               <div className={`transition-all duration-300 overflow-hidden ${isSidebarOpen ? 'h-auto opacity-100' : 'h-0 opacity-0'}`}>
                   
-                  {/* Clear All button */}
                   {(selectedSeverities.length < 5 || packageFilter || searchCVE) && (
                       <div className="flex justify-end mb-4">
                           <button
@@ -260,7 +291,6 @@ export default function ReleaseVersionDetailPage() {
                       </div>
                   )}
 
-                  {/* Filter by Severity: Material UI Icon */}
                   <div className="mb-6"> 
                       <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
                           <SecurityIcon sx={{ width: 16, height: 16, color: 'rgb(22, 163, 74)' }} /> 
@@ -287,7 +317,6 @@ export default function ReleaseVersionDetailPage() {
                       </div>
                   </div>
 
-                  {/* Filter by Package: Material UI Icon */}
                   <div className="mb-6"> 
                       <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
                           <Inventory2Icon sx={{ width: 16, height: 16, color: 'rgb(59, 130, 246)' }} /> 
@@ -295,23 +324,20 @@ export default function ReleaseVersionDetailPage() {
                       </h4>
                       <input
                           type="text"
-                          // FIX: Use arbitrary width (w-[98%]) and margin auto (mx-auto) to center and provide space for the focus ring.
-                          // Updated placeholder for consistency
                           className="w-[98%] mx-auto px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 block"
                           value={packageFilter}
                           onChange={e => setPackageFilter(e.target.value)}
-                          placeholder="Filter by package name..." // <<< CHANGED HERE
+                          placeholder="Filter by package name..."
                       />
                   </div>
 
-                  {/* Search CVE ID: Material Symbol Icon (threat_intelligence) */}
                   <div className="mb-6"> 
                       <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center gap-2">
                           <span 
                               className="material-symbols-outlined" 
                               style={{ 
                                   fontSize: '20px', 
-                                  color: 'rgb(185, 28, 28)', // Red color
+                                  color: 'rgb(185, 28, 28)',
                                   lineHeight: '1'
                               }}>
                               threat_intelligence
@@ -320,27 +346,21 @@ export default function ReleaseVersionDetailPage() {
                       </h4>
                       <input
                           type="text"
-                          // FIX: Use arbitrary width (w-[98%]) and margin auto (mx-auto) to center and provide space for the focus ring.
                           className="w-[98%] mx-auto px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 block"
                           value={searchCVE}
                           onChange={e => setSearchCVE(e.target.value)}
                           placeholder="Filter by CVE ID..."
                       />
                   </div>
-              </div> 
-              {/* END Collapsible Content Wrapper */}
+              </div>
 
-            </div> 
-            {/* END Filter Box */}
+            </div>
           </div>
-          {/* END STICKY WRAPPER */}
 
         </aside>
 
-        {/* Main content */}
         <main className="flex-1 space-y-6">
           
-          {/* Back Button & Release Title */}
           <div className="flex items-center gap-4 mb-6">
               <button
                   onClick={() => router.back()}
@@ -354,18 +374,15 @@ export default function ReleaseVersionDetailPage() {
                   {release.name} <span className="text-gray-500 font-normal">({release.version})</span>
               </h1>
           </div>
-          {/* End Back Button & Title */}
 
-          {/* Summary Card - Icons (Material UI) - NOW WITH 5 COLUMNS INCLUDING DOWNLOAD BUTTON */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 text-center bg-gray-50 p-4 rounded-lg border border-gray-200">
             <div>
-              {/* Vulnerabilities - Material Symbol Icon (threat_intelligence) */}
               <p className="text-xs text-gray-600 flex justify-center items-center gap-1">
                 <span 
                     className="material-symbols-outlined" 
                     style={{ 
                         fontSize: '20px', 
-                        color: 'rgb(185, 28, 28)', // Red color
+                        color: 'rgb(185, 28, 28)',
                         lineHeight: '1'
                     }}>
                     threat_intelligence
@@ -375,7 +392,6 @@ export default function ReleaseVersionDetailPage() {
               <p className="font-medium text-lg text-gray-900">{vulnerabilities.length}</p>
             </div>
             <div>
-              {/* OpenSSF Score icon uses SecurityIcon */}
               <p className="text-xs text-gray-600 flex justify-center items-center gap-1"><SecurityIcon sx={{ width: 16, height: 16, color: 'rgb(22, 163, 74)' }} /> OpenSSF Score</p>
               <p className="font-medium text-lg text-gray-900">{openssfScore}</p>
             </div>
@@ -388,7 +404,6 @@ export default function ReleaseVersionDetailPage() {
               <p className="font-medium text-lg text-gray-900">{packages.length}</p>
             </div>
             
-            {/* DOWNLOAD SBOM BUTTON - REVERTED TO CLEAN TEXT LINK STRUCTURE */}
             {release.sbom?.content && (
               <div className="flex flex-col items-center justify-center">
                   <p className="text-xs text-gray-600 flex justify-center items-center gap-1">
@@ -396,7 +411,6 @@ export default function ReleaseVersionDetailPage() {
                   </p>
                   <button
                     onClick={downloadSBOM}
-                    // Cleaned-up style to act as a text link inside the grid cell
                     className="font-medium text-lg text-gray-900 text-blue-600 hover:text-blue-800 transition-colors bg-transparent border-none p-0 cursor-pointer"
                   >
                       Download
@@ -405,7 +419,6 @@ export default function ReleaseVersionDetailPage() {
             )}
           </div>
 
-          {/* New Synced Endpoints Section (Before CVE/Package Table) */}
           <section className="mt-6 p-4 border rounded-lg bg-gray-50">
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
               <LinkIcon sx={{ width: 20, height: 20, color: 'rgb(37, 99, 235)' }} /> 
@@ -413,7 +426,6 @@ export default function ReleaseVersionDetailPage() {
             </h3>
             <div className="overflow-x-auto border rounded-lg">
               <table className="min-w-full divide-y divide-gray-200">
-                {/* HEADERS: Always visible */}
                 <thead className="bg-gray-100">
                   <tr>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">Endpoint Name</th>
@@ -424,7 +436,6 @@ export default function ReleaseVersionDetailPage() {
                 </thead>
                 <tbody>
                   {syncedEndpointsList.length > 0 ? (
-                    // Display data rows if list is not empty
                     syncedEndpointsList.map((endpoint, idx) => (
                       <tr key={idx} className="hover:bg-gray-50">
                         <td className="px-4 py-2 align-top whitespace-normal text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
@@ -448,7 +459,6 @@ export default function ReleaseVersionDetailPage() {
                       </tr>
                     ))
                   ) : (
-                    // Display 'No data' message if list is empty
                     <tr>
                       <td colSpan={4} className="px-4 py-8 text-center bg-white">
                         <p className="text-gray-500 font-medium text-lg">No synced endpoints found for this release.</p>
@@ -459,15 +469,10 @@ export default function ReleaseVersionDetailPage() {
               </table>
             </div>
           </section>
-          {/* End New Synced Endpoints Section */}
 
-
-          {/* Combined CVE + Packages Table */}
-          {/* FIX: Set maximum height to max-h-96 (384px) to be close to 400px tall. */}
           <div className="overflow-auto border rounded-lg max-h-96"> 
             {combinedData.length > 0 ? (
               <table className="w-full table-auto min-w-[700px]">
-                {/* HEADERS: Always visible when data exists */}
                 <thead className="bg-gray-100 sticky top-0 z-10">
                   <tr>
                     <th className="px-4 py-2 text-left border-b">CVE ID</th>
@@ -497,7 +502,6 @@ export default function ReleaseVersionDetailPage() {
                               ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-blue-100 text-blue-800'
                           } flex items-center gap-1 w-fit`}>
-                            {/* Critical uses Material Symbol Font Icon for 'bomb' */}
                             {row.severity === 'critical' ? (
                                 <span className="material-symbols-outlined" style={{ 
                                     fontSize: '12px', 
@@ -510,11 +514,8 @@ export default function ReleaseVersionDetailPage() {
                                     bomb
                                 </span>
                             ) : 
-                             /* High uses WhatshotIcon (Fire) */
                              row.severity === 'high' ? <WhatshotIcon sx={{ width: 12, height: 12, color: 'rgb(194, 65, 12)' }} /> : 
-                             /* Medium now uses NotificationsIcon (Bell) */
                              row.severity === 'medium' ? <NotificationsIcon sx={{ width: 12, height: 12, color: 'rgb(202, 138, 4)' }} /> : 
-                             /* Low now uses WarningIcon (Warning) */
                              <WarningIcon sx={{ width: 12, height: 12, color: 'rgb(29, 78, 216)' }} />} {row.severity.toUpperCase()}
                           </span>
                         )}
@@ -528,10 +529,7 @@ export default function ReleaseVersionDetailPage() {
                 </tbody>
               </table>
             ) : (
-              // When NO data is found, render a table structure with headers 
-              // and a single cell spanning all columns to display the message.
               <table className="w-full table-auto min-w-[700px]">
-                {/* HEADERS: Displayed even when empty */}
                 <thead className="bg-gray-100 sticky top-0 z-10">
                   <tr>
                     <th className="px-4 py-2 text-left border-b">CVE ID</th>
@@ -544,7 +542,6 @@ export default function ReleaseVersionDetailPage() {
                 </thead>
                 <tbody>
                   <tr>
-                    {/* Message spans all 6 columns */}
                     <td colSpan={6} className="px-4 py-8 text-center bg-white">
                       <p className="text-gray-500 font-medium text-lg">No data found matching current filters.</p>
                     </td>
@@ -554,17 +551,13 @@ export default function ReleaseVersionDetailPage() {
             )}
           </div>
 
-
-          {/* Git Details - Icons updated to Material UI */}
           <section className="mt-6 p-4 border rounded-lg bg-gray-50">
-            {/* Main Header: Changed to BuildIcon (Build/Tools) */}
             <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <BuildIcon sx={{ width: 20, height: 20, color: 'rgb(100, 116, 139)' }} /> {/* Slate color */}
+                <BuildIcon sx={{ width: 20, height: 20, color: 'rgb(100, 116, 139)' }} />
                 Source & Build Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1 text-sm text-gray-700">
               
-              {/* Source Control: AltRouteIcon */}
               <div>
                 <h4 className="text-md font-semibold text-gray-900 mt-2 mb-1 flex items-center gap-2">
                     <AltRouteIcon sx={{ width: 16, height: 16, color: 'rgb(59, 130, 246)' }} />
@@ -581,10 +574,9 @@ export default function ReleaseVersionDetailPage() {
                 </ul>
               </div>
 
-              {/* Container Artifacts: Inventory2Icon (similar to box/container) */}
               <div>
                 <h4 className="text-md font-semibold text-gray-900 mt-2 mb-1 flex items-center gap-2">
-                    <Inventory2Icon sx={{ width: 16, height: 16, color: 'rgb(20, 184, 166)' }} /> {/* Teal color */}
+                    <Inventory2Icon sx={{ width: 16, height: 16, color: 'rgb(20, 184, 166)' }} />
                     Container Artifacts
                 </h4>
                 <ul className="space-y-1">
@@ -598,10 +590,9 @@ export default function ReleaseVersionDetailPage() {
                 </ul>
               </div>
 
-              {/* Commit & Contribution Stats: HistoryIcon */}
               <div>
                 <h4 className="text-md font-semibold text-gray-900 mt-2 mb-1 flex items-center gap-2">
-                    <HistoryIcon sx={{ width: 16, height: 16, color: 'rgb(124, 58, 237)' }} /> {/* Violet color */}
+                    <HistoryIcon sx={{ width: 16, height: 16, color: 'rgb(124, 58, 237)' }} />
                     Metrics & Timestamps
                 </h4>
                 <ul className="space-y-1">
@@ -617,10 +608,9 @@ export default function ReleaseVersionDetailPage() {
                 </ul>
               </div>
 
-              {/* Build Metadata: ConstructionIcon (Helmet/Safety/Build) */}
               <div className="lg:col-span-3">
                 <h4 className="text-md font-semibold text-gray-900 mt-2 mb-1 flex items-center gap-2">
-                    <ConstructionIcon sx={{ width: 16, height: 16, color: 'rgb(249, 115, 22)' }} /> {/* Orange color */}
+                    <ConstructionIcon sx={{ width: 16, height: 16, color: 'rgb(249, 115, 22)' }} />
                     Build Environment
                 </h4>
                 <ul className="space-y-1 grid grid-cols-2 md:grid-cols-4">
@@ -634,12 +624,10 @@ export default function ReleaseVersionDetailPage() {
             </div>
           </section>
 
-          {/* OpenSSF Scorecard - SecurityIcon */}
           {release.scorecard_result && (
             <section className="mt-6 p-4 border rounded-lg bg-gray-50">
-              {/* Header: Increased size and weight */}
               <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <SecurityIcon sx={{ width: 20, height: 20, color: 'rgb(22, 163, 74)' }} /> {/* Green color for verification/security */}
+                <SecurityIcon sx={{ width: 20, height: 20, color: 'rgb(22, 163, 74)' }} />
                 OpenSSF Scorecard
               </h3>
               <p className="text-sm text-gray-600 mb-2">
@@ -658,7 +646,6 @@ export default function ReleaseVersionDetailPage() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {release.scorecard_result.Checks.map((check, idx) => (
                       <tr key={idx} className="hover:bg-gray-50">
-                        {/* Removed bold/strong from data and kept align-top */}
                         <td className="px-4 py-2 align-top whitespace-normal text-sm text-gray-900">
                           {check.Name}
                         </td>
