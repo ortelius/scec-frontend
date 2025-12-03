@@ -117,6 +117,7 @@ export interface AffectedRelease {
   openssf_scorecard_score?: number
   dependency_count: number
   synced_endpoint_count?: number
+  version_count: number
 }
 
 export interface GetAffectedReleasesResponse {
@@ -203,4 +204,5 @@ export interface ImageData {
   signed: boolean
   openssfScore: number
   syncedEndpoints: number
+  version_count: number
 }

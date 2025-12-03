@@ -181,7 +181,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
     }
 
     fetchDataForCategory()
-  }, [selectedCategory]) // Run when selectedCategory changes
+  }, [selectedCategory])
 
   useEffect(() => {
     setCurrentPage(1)
@@ -501,7 +501,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
                 <button
                   onClick={() => {
                     setFetchedData(prev => ({ ...prev, [selectedCategory]: false }))
-                    setSelectedCategory(selectedCategory) // Trigger re-fetch
+                    setSelectedCategory(selectedCategory)
                   }}
                   className="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
                 >
@@ -515,7 +515,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
     )
   }
 
-  // Rest of the component remains the same (rendering logic)
   return (
     <>
       <div className="border-b border-gray-200 bg-white">
@@ -579,7 +578,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
               )}
             </div>
 
-            {/* Mitigations Action Header */}
             {selectedCategory === 'mitigations' && (
               <div className="mb-4 bg-white border border-gray-200 rounded-lg">
                 <div className="px-6 py-4 flex items-center justify-between">
@@ -652,7 +650,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
               </div>
             )}
             
-            {/* Results Grid/List - keeping just the structure, full implementation remains the same */}
             {filteredData.length === 0 ? (
               <div className="text-center py-12">
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -664,7 +661,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* Card rendering logic remains exactly the same as original */}
                   {selectedCategory === 'image' &&
                     (paginatedData as SyncedEndpoint[]).map((endpoint, index) => (
                       <div
@@ -723,7 +719,6 @@ export default function SearchResults({ query }: SearchResultsProps) {
                       </div>
                     ))}
 
-                  {/* Other category renderings remain exactly the same... */}
                   {selectedCategory === 'plugin' &&
                     (paginatedData as Mitigation[]).map(vuln => (
                       <div
@@ -874,12 +869,17 @@ export default function SearchResults({ query }: SearchResultsProps) {
                             <span className="font-medium">{result.syncedEndpoints || 0} endpoint{result.syncedEndpoints !== 1 ? 's' : ''}</span>
                           </div>
                         </div>
-                        <div className="text-xs text-gray-500 mt-2">Updated {result.updated}</div>
+                        <div className="flex items-center justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-gray-100">
+                          <span>Updated {result.updated}</span>
+                          <div className="flex items-center gap-1">
+                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span className="font-medium">{result.version_count} version{result.version_count !== 1 ? 's' : ''}</span>
+                          </div>
+                        </div>
                       </div>
                     ))}
                 </div>
 
-                {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="mt-8 flex items-center justify-between border-t border-gray-200 pt-4">
                     <button

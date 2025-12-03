@@ -64,7 +64,6 @@ export async function graphqlQuery<T>(query: string, variables?: Record<string, 
 }
 
 // ------------------ QUERIES ------------------
-// (The queries below remain exactly as they were in your original file)
 
 // Fetch a single release with full fields including OpenSSF Scorecard
 export const GET_RELEASE = `
@@ -182,6 +181,7 @@ export const GET_AFFECTED_RELEASES = `
       openssf_scorecard_score
       dependency_count
       synced_endpoint_count
+      version_count
     }
   }
 `

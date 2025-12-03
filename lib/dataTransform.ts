@@ -101,7 +101,8 @@ export function transformAffectedReleasesToImageData (
       dependency_count: firstRelease.dependency_count,
       signed: false,
       openssfScore: firstRelease.openssf_scorecard_score ?? 0,
-      syncedEndpoints: firstRelease.synced_endpoint_count ?? 0
+      syncedEndpoints: firstRelease.synced_endpoint_count ?? 0,
+      version_count: firstRelease.version_count ?? 1
     })
   })
 
