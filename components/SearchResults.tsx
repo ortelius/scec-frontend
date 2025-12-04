@@ -385,13 +385,14 @@ export default function SearchResults({ query }: SearchResultsProps) {
     return pages
   }
 
+  // FIXED: URL-encode release names and endpoint names to handle slashes
   const handleCardClick = (item: any) => {
     if (selectedCategory === 'image') {
       const endpoint = item as SyncedEndpoint
-      router.push(`/endpoint/${endpoint.endpoint_name}`)
+      router.push(`/endpoint/${encodeURIComponent(endpoint.endpoint_name)}`)
     } else if (selectedCategory === 'all') {
       const release = item as ImageData
-      router.push(`/release/${release.name}?version=${encodeURIComponent(release.version)}`)
+      router.push(`/release/${encodeURIComponent(release.name)}?version=${encodeURIComponent(release.version)}`)
     }
   }
 
