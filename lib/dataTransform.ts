@@ -112,7 +112,7 @@ export function transformAffectedReleasesToImageData (
       syncedEndpoints: firstRelease.synced_endpoint_count ?? 0,
       version_count: firstRelease.version_count ?? 1,
       total_vulnerabilities: totalVulnerabilities,
-      vulnerability_count_delta: vulnerabilityCountDelta
+      vulnerability_count_delta: vulnerabilityCountDelta ?? 0
     })
   })
 
