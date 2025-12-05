@@ -63,7 +63,7 @@ export function transformAffectedReleasesToImageData (
   releaseMap.forEach((releases, key) => {
     const firstRelease = releases[0]
 
-    // Count vulnerabilities
+    // Count vulnerabilities from the releases array (each item is a CVE)
     const vulnCounts = {
       critical: 0,
       high: 0,
@@ -85,6 +85,14 @@ export function transformAffectedReleasesToImageData (
       return date > latest ? date : latest
     }, new Date(0))
 
+    // Calculate total vulnerabilities from vulnerability_count field
+    const totalVulnerabilities = firstRelease.vulnerability_count || 0
+    
+    // Get vulnerability count delta (can be positive, negative, zero, or null)
+    const vulnerabilityCountDelta = firstRelease.vulnerability_count_delta !== undefined 
+      ? firstRelease.vulnerability_count_delta 
+      : null
+
     imageDataList.push({
       name: firstRelease.release_name,
       version: firstRelease.release_version,
@@ -102,7 +110,9 @@ export function transformAffectedReleasesToImageData (
       signed: false,
       openssfScore: firstRelease.openssf_scorecard_score ?? 0,
       syncedEndpoints: firstRelease.synced_endpoint_count ?? 0,
-      version_count: firstRelease.version_count ?? 1
+      version_count: firstRelease.version_count ?? 1,
+      total_vulnerabilities: totalVulnerabilities,
+      vulnerability_count_delta: vulnerabilityCountDelta
     })
   })
 

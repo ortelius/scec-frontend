@@ -70,7 +70,7 @@ export default function ReleaseVersionDetailPage() {
 
         setVulnerabilities(releaseData.vulnerabilities)
 
-        // Parse packages from SBOM
+        // Parse packages from SBOM for clean packages display
         let pkgData: Array<{ name: string; version: string; purl?: string }> = []
         try {
           if (releaseData.sbom?.content) {
@@ -236,6 +236,8 @@ export default function ReleaseVersionDetailPage() {
   const openssfScore = release.openssf_scorecard_score ?? 'N/A'
   const syncedEndpoints = release.synced_endpoint_count || 0
   const syncedEndpointsList = release.synced_endpoints || []
+  // Use backend dependency count
+  const dependencyCount = release.dependency_count ?? 0
 
 
   return (
@@ -401,7 +403,7 @@ export default function ReleaseVersionDetailPage() {
             </div>
             <div>
               <p className="text-xs text-gray-600 flex justify-center items-center gap-1"><Inventory2Icon sx={{ width: 16, height: 16, color: 'rgb(107, 114, 128)' }} /> Packages</p>
-              <p className="font-medium text-lg text-gray-900">{packages.length}</p>
+              <p className="font-medium text-lg text-gray-900">{dependencyCount}</p>
             </div>
             
             {release.sbom?.content && (
@@ -624,44 +626,51 @@ export default function ReleaseVersionDetailPage() {
             </div>
           </section>
 
-          {release.scorecard_result && (
-            <section className="mt-6 p-4 border rounded-lg bg-gray-50">
-              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <SecurityIcon sx={{ width: 20, height: 20, color: 'rgb(22, 163, 74)' }} />
-                OpenSSF Scorecard
-              </h3>
-              <p className="text-sm text-gray-600 mb-2">
-                Aggregate Score: <span className="font-medium text-gray-900">{release.scorecard_result.Score || '—'}</span> (Version: {release.scorecard_result.Scorecard.Version})
-              </p>
-              
-              <div className="overflow-x-auto border rounded-lg mt-4">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">Check Name</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">Score</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {release.scorecard_result.Checks.map((check, idx) => (
-                      <tr key={idx} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 align-top whitespace-normal text-sm text-gray-900">
-                          {check.Name}
-                        </td>
-                        <td className="px-4 py-2 align-top whitespace-nowrap text-sm text-gray-700">
-                          {check.Score}
-                        </td>
-                        <td className="px-4 py-2 align-top text-sm text-gray-700 break-words max-w-sm">
-                          {check.Reason ?? '—'}
-                        </td>
+          <section className="mt-6 p-4 border rounded-lg bg-gray-50">
+            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              <SecurityIcon sx={{ width: 20, height: 20, color: 'rgb(22, 163, 74)' }} />
+              OpenSSF Scorecard
+            </h3>
+            
+            {release.scorecard_result ? (
+              <>
+                <p className="text-sm text-gray-600 mb-2">
+                  Aggregate Score: <span className="font-medium text-gray-900">{release.scorecard_result.Score || '—'}</span> (Version: {release.scorecard_result.Scorecard.Version})
+                </p>
+                
+                <div className="overflow-x-auto border rounded-lg mt-4">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">Check Name</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">Score</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {release.scorecard_result.Checks.map((check, idx) => (
+                        <tr key={idx} className="hover:bg-gray-50">
+                          <td className="px-4 py-2 align-top whitespace-normal text-sm text-gray-900">
+                            {check.Name}
+                          </td>
+                          <td className="px-4 py-2 align-top whitespace-nowrap text-sm text-gray-700">
+                            {check.Score}
+                          </td>
+                          <td className="px-4 py-2 align-top text-sm text-gray-700 break-words max-w-sm">
+                            {check.Reason ?? '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            ) : (
+              <div className="py-8 text-center">
+                <p className="text-gray-500 font-medium text-lg">No OpenSSF Scorecard data available for this release.</p>
               </div>
-            </section>
-          )}
+            )}
+          </section>
 
         </main>
       </div>

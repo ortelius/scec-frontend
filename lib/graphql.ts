@@ -100,6 +100,7 @@ export const GET_RELEASE = `
       build_id 
       build_num 
       build_url 
+      dependency_count
       sbom {
         key
         contentsha
@@ -158,7 +159,7 @@ export const GET_RELEASE = `
   }
 `
 
-// Affected releases for vulnerabilities page
+// Affected releases for vulnerabilities page - UPDATED WITH NEW FIELDS
 export const GET_AFFECTED_RELEASES = `
   query GetAffectedReleases($severity: Severity!, $limit: Int) {
     affectedReleases(severity: $severity, limit: $limit) {
@@ -182,6 +183,8 @@ export const GET_AFFECTED_RELEASES = `
       dependency_count
       synced_endpoint_count
       version_count
+      vulnerability_count
+      vulnerability_count_delta
     }
   }
 `

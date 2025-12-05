@@ -87,6 +87,7 @@ export interface Release {
   build_id?: string
   build_num?: string
   build_url?: string
+  dependency_count?: number
   sbom?: SBOM
   vulnerabilities: Vulnerability[]
   openssf_scorecard_score?: number
@@ -118,6 +119,8 @@ export interface AffectedRelease {
   dependency_count: number
   synced_endpoint_count?: number
   version_count: number
+  vulnerability_count?: number
+  vulnerability_count_delta?: number
 }
 
 export interface GetAffectedReleasesResponse {
@@ -205,4 +208,6 @@ export interface ImageData {
   openssfScore: number
   syncedEndpoints: number
   version_count: number
+  total_vulnerabilities: number
+  vulnerability_count_delta?: number
 }
